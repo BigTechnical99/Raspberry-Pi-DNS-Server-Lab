@@ -455,7 +455,7 @@ ip -4 addr show eth0
 
 The recovered output shows eth0 in the UP state with address 172.16.0.57/24. The Ethernet hardware address was used to identify the correct adapter for the router reservation; it has been hidden in the published screenshot.
 
-![Ethernet interface validation](../screenshots/phase-3-03-ethernet-interface-validation.png)
+![Ethernet interface validation](screenshots/phase-3-03-ethernet-interface-validation.png)
 
 ## 2. Reserve the address in Orbi
 
@@ -465,7 +465,7 @@ A DHCP reservation tells the router to keep assigning the same address to that a
 
 The recovered Orbi Address Reservation table shows DNS-SERVER reserved at 172.16.0.57. The published image is cropped to this table, with the MAC address masked.
 
-![Orbi DHCP address reservation](../screenshots/phase-3-04-router-dhcp-reservation.png)
+![Orbi DHCP address reservation](screenshots/phase-3-04-router-dhcp-reservation.png)
 
 ## 3. Reboot and verify SSH access
 
@@ -483,7 +483,7 @@ ssh <your-pi-username>@172.16.0.57
 
 The original screenshot shows the reboot disconnect followed by a successful SSH login to 172.16.0.57. The username, local client path and SSH host fingerprint are redacted. The placeholder above is documentation, not a replacement for original command output.
 
-![Reboot and SSH validation](../screenshots/phase-3-02-reboot-ssh-validation.png)
+![Reboot and SSH validation](screenshots/phase-3-02-reboot-ssh-validation.png)
 
 ## 4. Verify the assigned address, route and internet access
 
@@ -501,7 +501,7 @@ The recovered output shows:
 - The Ethernet route had the lower metric and was preferred.
 - All four internet ping requests received replies, with 0% packet loss.
 
-![Address, route and connectivity validation](../screenshots/phase-3-01-dhcp-reservation-validation.png)
+![Address, route and connectivity validation](screenshots/phase-3-01-dhcp-reservation-validation.png)
 
 The established filename is retained. This screenshot supports address, routing and connectivity validation; it does not display the router reservation itself.
 
@@ -515,7 +515,7 @@ sudo nmcli radio wifi off
 
 The recovered Ethernet-only screenshot confirms `nmcli radio wifi` returned `disabled`, `eth0` was connected, and `wlan0` was unavailable.
 
-![Ethernet-only and domain connectivity validation](../screenshots/phase-3-05-ethernet-only-network-validation.png)
+![Ethernet-only and domain connectivity validation](screenshots/phase-3-05-ethernet-only-network-validation.png)
 
 The same screenshot records the domain-name connectivity check:
 
