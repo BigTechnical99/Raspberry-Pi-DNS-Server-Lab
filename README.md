@@ -463,7 +463,9 @@ I created a DHCP address reservation in the Orbi router for the Pi's Ethernet ad
 
 A DHCP reservation tells the router to keep assigning the same address to that adapter. The Pi still obtains its network settings through DHCP; this is different from configuring a static address directly on the Pi. A consistent address allows clients to keep using the Pi as their DNS server.
 
-Evidence note: the router reservation configuration screenshot was not recovered. The terminal validation below shows the assigned address but cannot independently prove the saved router setting.
+The recovered Orbi Address Reservation table shows DNS-SERVER reserved at 172.16.0.57. The published image is cropped to this table, with the MAC address masked.
+
+![Orbi DHCP address reservation](../screenshots/phase-3-04-router-dhcp-reservation.png)
 
 ## 3. Reboot and verify SSH access
 
@@ -511,21 +513,30 @@ Later in the project, I disabled Wi-Fi so the server used its wired connection:
 sudo nmcli radio wifi off
 ```
 
-The recovered Phase 3 images predate this change and do not prove Wi-Fi was disabled. No existing screenshot has been altered to suggest otherwise.
+The recovered Ethernet-only screenshot confirms `nmcli radio wifi` returned `disabled`, `eth0` was connected, and `wlan0` was unavailable.
 
-A domain-name connectivity check can be documented separately with:
+![Ethernet-only and domain connectivity validation](../screenshots/phase-3-05-ethernet-only-network-validation.png)
+
+The same screenshot records the domain-name connectivity check:
 
 ```bash
 ping -c 4 google.com
 ```
 
-The recovered Phase 2 network screenshot already shows a successful domain-name ping. No new Phase 3 domain-name test result is claimed here.
+The domain resolved to an IPv4 address and all four ping requests received replies, with 0% packet loss.
 
 ## Outcome
 
-The Pi was reachable through SSH at 172.16.0.57 after reboot. Ethernet was active, its route was preferred in the captured output, and internet connectivity by IP address was confirmed. The router reservation and later Wi-Fi-disable action are recorded from the project history, with their screenshot gaps stated explicitly.
+The recovered evidence shows the Orbi reservation for 172.16.0.57, successful SSH access at that address after reboot, Ethernet interface and routing validation, and later Ethernet-only operation with successful domain-name connectivity. The earlier routing screenshot still shows Wi-Fi active; the later validation confirms it was disabled.
 
-## Missing evidence and optional new captures
+## Screenshot inventory and evidence status
 
-- Router reservation screen: not recovered. If captured now, show only the Pi's reservation and reserved IP. Hide MAC addresses, other devices, router account details, serial numbers and public IP information. Suggested new filename: phase-3-04-router-dhcp-reservation.png.
-- Wi-Fi-disabled validation: not recovered. If captured now, show `nmcli radio wifi`, `nmcli device status`, and `ip route`. Hide SSIDs, usernames and hardware addresses. Suggested new filename: phase-3-05-ethernet-only-validation.png.
+| Filename | Evidence |
+| --- | --- |
+| phase-3-01-dhcp-reservation-validation.png | Assigned Ethernet address, preferred route, internet ping |
+| phase-3-02-reboot-ssh-validation.png | Reboot and subsequent successful SSH login |
+| phase-3-03-ethernet-interface-validation.png | Ethernet link UP and assigned IPv4 address; retained from the original ZIP |
+| phase-3-04-router-dhcp-reservation.png | Orbi Address Reservation table |
+| phase-3-05-ethernet-only-network-validation.png | Wi-Fi disabled, Ethernet connected, successful domain ping |
+
+Both previously listed Phase 3 screenshot gaps have been filled by recovered uploads. No screenshots were fabricated. The uploaded Ethernet-only image originally used number 02; its published filename is number 05 to preserve the original ZIP's existing 02 reboot image and prevent collisions. Unredacted originals and the redundant connected-device list are not included.
