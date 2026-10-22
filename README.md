@@ -541,6 +541,7 @@ The recovered evidence shows the Orbi reservation for 172.16.0.57, successful SS
 
 Both previously listed Phase 3 screenshot gaps have been filled by recovered uploads. No screenshots were fabricated. The uploaded Ethernet-only image originally used number 02; its published filename is number 05 to preserve the original ZIP's existing 02 reboot image and prevent collisions. Unredacted originals and the redundant connected-device list are not included.
 
+
 # Phase 4 — AdGuard Home Installation and Configuration
 
 ## Objective
@@ -566,7 +567,9 @@ This document records the existing lab. Commands below describe validation steps
 
 I used the AdGuard Home installation script for the Raspberry Pi's ARM64 environment. The project conversation records installation in /opt/AdGuardHome, automatic service startup and the initial setup address http://172.16.0.57:3000.
 
-The original installer screenshot was not recovered. The historical shell command was only partially retrieved, so it is not reconstructed here. The later service-status screenshot independently confirms AdGuard Home v0.107.79 was running.
+The recovered installer output confirms successful installation, that the service was running, and that it was configured to start automatically on boot. It also displays the initial setup URL. The exact installation command is not visible in this screenshot and is not reconstructed here.
+
+![AdGuard Home installation](screenshots/phase-4-01-adguard-installation.png)
 
 ## 2. Configure web and DNS interfaces
 
@@ -603,9 +606,7 @@ The recovered terminal screenshot shows:
 
 - AdGuard Home service status: running.
 - UDP 172.16.0.57:53 and TCP 172.16.0.57:53 owned by AdGuardHome.
-- TCP 172.16.0.57:80 for the web interface.
 - An example.com response containing IPv4 and IPv6 answers from DNS server 172.16.0.57.
-- eth0 connected and wlan0 unavailable.
 
 ![DNS service and resolution validation](screenshots/phase-4-02-dns-service-validation.png)
 
@@ -627,12 +628,22 @@ I used example.org for a controlled blocking test. The recovered Query Log shows
 
 This demonstrates the custom rule was applied to the test domain. It is not evidence that example.org is malicious, or a benchmark of general ad blocking. The exact custom-rule text and the corresponding terminal blocked response were not recovered in this image set.
 
-## 6. Reboot persistence evidence
+## 6. Additional service-health validation
 
-The historical Phase 4 outline included a reboot-persistence check. The recovered terminal image shows a running service and working DNS, but does not display the reboot and reconnect sequence. I therefore do not present it as proof of persistence across reboot.
+A later validation screenshot shows AdGuard Home running, DNS listening on UDP/TCP 172.16.0.57:53, and the web interface listening on TCP 172.16.0.57:80. A direct example.com lookup succeeds, eth0 is connected, and wlan0 is unavailable.
 
-Original screenshot unavailable: phase-4-05-reboot-persistence-validation.png.
+![Additional service-health validation](screenshots/phase-4-05-reboot-persistence-validation.png)
+
+The original filename is retained for consistency. This image does not show a reboot sequence or uptime, so it confirms service health but does not independently prove persistence across reboot. The installer message confirms automatic startup was configured; it does not by itself verify a successful restart after reboot.
 
 ## Outcome
 
-The recovered screenshots confirm Ethernet-bound admin and DNS settings, a running AdGuard Home service, UDP/TCP DNS listeners, successful direct DNS resolution, query logging and a controlled custom-rule block. Installation details are recorded from the project conversation; installer and reboot-sequence images remain unavailable.
+The six recovered screenshots document successful installation, Ethernet-bound web and DNS settings, a running AdGuard Home service, UDP/TCP DNS listeners, successful direct DNS resolution, query logging, controlled filtering and a later service-health check.
+
+The test queries shown came from the Pi itself. They do not establish that every household device was using AdGuard Home; client configuration and testing are documented separately.
+
+## Evidence limitations
+
+All six screenshot files are available. The reboot and reconnect sequence itself is not shown, so reboot persistence remains unverified by these images alone. Administrator-account creation, the dnsutils package installation and the exact custom-filter rule text are not pictured. No images or command output were fabricated to fill these gaps.
+
+Usernames are redacted in the published terminal images. The installer image retains its existing redaction. Private LAN addresses, generic hostnames and public test domains remain visible to explain the lab.
