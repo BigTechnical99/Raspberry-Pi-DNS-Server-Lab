@@ -238,7 +238,7 @@ This explained why the operating system image repeatedly failed verification.
 
 *Figure 2 — H2testw identified data loss, corruption, and overwritten data on the original microSD card.*
 
-**Troubleshooting Outcome:** The original microSD card was identified as defective and removed from the deployment process.
+**Troubleshooting Outcome:** The original microSD card was identified as defective and removed from the deployment process.(Original screenshot unavailable. During testing, H2testw reported approximately 2.4 GB of data loss on the original microSD card. I replaced the card and confirmed the replacement passed testing.)
 
 ---
 
