@@ -172,3 +172,255 @@ AdGuard Home forwards permitted DNS requests to Unbound, which performs recursiv
 **Design Consideration:** The Orbi router acts as a DNS proxy for most automatically configured household devices. As a result, AdGuard Home often identifies those requests as originating from the router rather than the individual device. Direct DNS configuration was used on the Windows PC to enable client-specific filtering and more accurate query attribution.
 
 ---
+
+
+## 🛠️ The Process
+
+### Phase 2 — Raspberry Pi OS Deployment
+
+#### Objective
+
+The objective of this phase was to deploy a stable, headless Linux operating system on the Raspberry Pi 4 and establish secure remote administration through SSH.
+
+I selected **Raspberry Pi OS Lite (64-bit)** because it provides a lightweight Debian-based environment without a desktop interface, allowing more system resources to be dedicated to DNS services.
+
+This phase also involved diagnosing an unexpected storage failure, replacing defective installation media, and validating the operating system before continuing with network and DNS configuration.
+
+---
+
+#### Step 1 — Prepare the Raspberry Pi OS Image
+
+I began by preparing the microSD card using Raspberry Pi Imager.
+
+The deployment configuration included:
+
+- **Device:** Raspberry Pi 4
+- **Operating System:** Raspberry Pi OS Lite (64-bit)
+- **Storage:** microSD card
+- **Hostname:** `DNS-SERVER`
+- **Remote Access:** SSH enabled
+- **User Account:** Custom non-root user
+- **Localization:** Regional and keyboard settings configured
+
+The goal was to deploy the Raspberry Pi without requiring a dedicated monitor, keyboard, or mouse.
+
+During the initial imaging attempts on macOS, Raspberry Pi Imager repeatedly failed during the verification stage.
+
+![Raspberry Pi imaging verification failure](screenshots/phase-2-01-imaging-verification-failure.png)
+
+*Figure 1 — Initial Raspberry Pi OS imaging attempts failed during post-write verification.*
+
+---
+
+#### Step 2 — Diagnose the microSD Card Failure
+
+Rather than repeatedly attempting to reinstall the operating system, I investigated whether the storage media was responsible for the verification errors.
+
+I used **H2testw**, a storage integrity testing utility, to perform a write-and-read verification test.
+
+The original microSD card produced the following results:
+
+```text
+The media is likely to be defective.
+
+4.6 GByte OK
+2.4 GByte DATA LOST
+646.3 MByte overwritten
+1.7 GByte corrupted
+646.3 MByte aliased memory
+```
+
+The results indicated that the card could not reliably retain the data written to it.
+
+This explained why the operating system image repeatedly failed verification.
+
+![Failed microSD integrity test](screenshots/phase-2-03-microsd-integrity-test-failed.png)
+
+*Figure 2 — H2testw identified data loss, corruption, and overwritten data on the original microSD card.*
+
+**Troubleshooting Outcome:** The original microSD card was identified as defective and removed from the deployment process.
+
+---
+
+#### Step 3 — Replace and Validate the Storage Media
+
+I replaced the defective card with a **SanDisk ImageMate PRO 64GB microSDXC**.
+
+Before attempting another operating system installation, I performed a full-capacity integrity test using H2testw.
+
+The replacement card successfully completed the test:
+
+```text
+Test finished without errors.
+
+60873 MByte written
+60873 MByte verified
+
+Write speed: 80.6 MB/s
+Read speed: 85.4 MB/s
+```
+
+This confirmed that the replacement storage media could reliably write and retrieve data across its tested capacity.
+
+![Replacement microSD integrity test](screenshots/phase-2-04-replacement-microsd-integrity-pass.png)
+
+*Figure 3 — Replacement SanDisk microSD card passed full-capacity write-and-read verification.*
+
+---
+
+#### Step 4 — Install Raspberry Pi OS Lite
+
+With the replacement storage validated, I repeated the installation using Raspberry Pi Imager.
+
+I selected Raspberry Pi OS Lite (64-bit), configured the hostname and user account, enabled SSH, and wrote the operating system image to the replacement microSD card.
+
+The installation completed successfully.
+
+![Successful Raspberry Pi OS installation](screenshots/phase-2-05-raspberry-pi-os-write-complete.png)
+
+*Figure 4 — Raspberry Pi Imager completed the operating system deployment successfully.*
+
+After installation, I inserted the microSD card into the Raspberry Pi 4, connected the device to the network, and powered it on.
+
+---
+
+#### Step 5 — Establish Headless SSH Access
+
+After the Raspberry Pi booted, I connected to the server remotely from my Windows PC using SSH.
+
+```powershell
+ssh <username>@dns-server.local
+```
+
+This allowed me to administer the Raspberry Pi without connecting a monitor or keyboard directly to the device.
+
+Once connected, I verified the operating system and hardware architecture.
+
+```bash
+hostname
+uname -m
+cat /etc/os-release
+```
+
+The server reported:
+
+```text
+Hostname: DNS-SERVER
+Architecture: aarch64
+Operating System: Debian GNU/Linux 13 (trixie)
+```
+
+This confirmed that the Raspberry Pi was running a 64-bit Linux operating system.
+
+![Initial SSH and system validation](screenshots/phase-2-06-first-ssh-system-validation.png)
+
+*Figure 5 — Successful remote SSH connection and verification of the Raspberry Pi operating system.*
+
+---
+
+#### Step 6 — Update the Operating System
+
+Before installing DNS applications, I updated the operating system packages.
+
+```bash
+sudo apt update
+sudo apt full-upgrade -y
+```
+
+I then rebooted the server:
+
+```bash
+sudo reboot
+```
+
+After reconnecting through SSH, I checked the operating system and kernel:
+
+```bash
+uname -r
+cat /etc/os-release
+```
+
+The system was running Raspberry Pi OS Lite based on Debian 13 with an updated Raspberry Pi kernel.
+
+---
+
+#### Step 7 — Validate System Health
+
+I performed several checks to confirm the Raspberry Pi was stable and ready for DNS deployment.
+
+**Check filesystem utilization:**
+
+```bash
+df -h /
+```
+
+The root filesystem reported approximately:
+
+```text
+Filesystem: /dev/mmcblk0p2
+Total:      59G
+Used:       ~4G
+Available:  ~52G
+```
+
+**Check memory availability:**
+
+```bash
+free -h
+```
+
+The Raspberry Pi reported approximately 1.8 GiB of total RAM.
+
+**Inspect kernel messages for storage-related errors:**
+
+```bash
+sudo dmesg | grep -iE 'mmc|error|i/o|ext4'
+```
+
+The system health review did not identify active storage I/O or filesystem errors.
+
+**Validate network connectivity:**
+
+```bash
+ping -c 4 google.com
+```
+
+The connectivity test completed successfully.
+
+![Post-upgrade system health validation](screenshots/phase-2-08-post-upgrade-system-health.png)
+
+*Figure 6 — Operating system, filesystem, and system health checks following the successful deployment.*
+
+---
+
+#### Challenges & Solutions
+
+**Challenge:** Raspberry Pi Imager repeatedly failed post-write verification.
+
+**Investigation:** Tested the original microSD card using H2testw to determine whether the problem was related to the imaging software or storage media.
+
+**Root Cause:** The original microSD card failed integrity testing and exhibited data corruption, overwritten data, and lost data.
+
+**Solution:** Replaced the defective storage media, verified the replacement using a full-capacity test, and successfully redeployed Raspberry Pi OS Lite.
+
+**Lesson Learned:** When an operating system installation repeatedly fails verification, hardware integrity should be investigated before assuming the installation software or operating system image is responsible.
+
+---
+
+#### Phase 2 Results
+
+By the end of this phase, I had successfully:
+
+- Deployed Raspberry Pi OS Lite (64-bit)
+- Identified and replaced defective microSD storage
+- Validated replacement storage integrity
+- Configured a custom hostname and non-root user
+- Established headless SSH administration
+- Updated operating system packages
+- Verified Linux architecture and kernel information
+- Confirmed filesystem and memory availability
+- Validated network connectivity and system stability
+
+**Phase 2 Status: Complete**
+
+---
