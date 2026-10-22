@@ -647,3 +647,239 @@ The test queries shown came from the Pi itself. They do not establish that every
 All six screenshot files are available. The reboot and reconnect sequence itself is not shown, so reboot persistence remains unverified by these images alone. Administrator-account creation, the dnsutils package installation and the exact custom-filter rule text are not pictured. No images or command output were fabricated to fill these gaps.
 
 Usernames are redacted in the published terminal images. The installer image retains its existing redaction. Private LAN addresses, generic hostnames and public test domains remain visible to explain the lab.
+
+
+### Phase 5 — Network-Wide DNS Integration
+
+#### Objective
+
+The objective of this phase was to expand AdGuard Home from a working local DNS service into a DNS filtering solution used by devices on the home network.
+
+In the previous phase, I confirmed that AdGuard Home could resolve and filter DNS queries sent directly to the Raspberry Pi.
+
+However, those tests did not establish that other network devices were automatically using the DNS server.
+
+To address this, I configured a Windows client to use the Raspberry Pi directly and updated the NETGEAR Orbi router's DNS settings to forward household DNS queries to AdGuard Home.
+
+---
+
+#### Step 1 — Verify DNS Service Accessibility from Windows
+
+Before changing the Windows DNS configuration, I verified that the Raspberry Pi was reachable on the network and that TCP port 53 was accessible.
+
+The Raspberry Pi DNS server was configured with the following network information:
+
+| Component | Configuration |
+|---|---|
+| DNS Server | Raspberry Pi 4 |
+| DNS Server IP | `172.16.0.57` |
+| Router / Gateway | `172.16.0.1` |
+| Windows Client IP | `172.16.0.74` |
+| Network Subnet | `172.16.0.0/24` |
+| DNS Port | 53 (UDP/TCP) |
+
+From Windows PowerShell, I ran:
+
+```powershell
+Test-NetConnection 172.16.0.57 -Port 53
+```
+
+The test returned:
+
+```text
+TcpTestSucceeded : True
+```
+
+This confirmed that the Windows computer could establish a TCP connection to the Raspberry Pi's DNS service.
+
+**Note:** This test validates TCP connectivity to port 53. DNS resolution is verified separately in the following steps.
+
+![Windows LAN DNS connectivity validation](screenshots/phase-5-01-lan-client-dns-validation.png)
+
+*Figure 1 — Windows PowerShell confirms connectivity to the Raspberry Pi DNS service on TCP port 53.*
+
+---
+
+#### Step 2 — Configure Windows to Use AdGuard Home
+
+After verifying connectivity, I configured the Windows PC to use the Raspberry Pi as its preferred DNS server.
+
+On Windows, I navigated to:
+
+**Settings → Network & Internet → Ethernet → DNS Server Assignment → Edit**
+
+I configured the DNS settings as follows:
+
+| Setting | Value |
+|---|---|
+| DNS Configuration | Manual |
+| IPv4 | Enabled |
+| Preferred DNS | `172.16.0.57` |
+| Alternate DNS | Left blank |
+| DNS over HTTPS | Off |
+
+This configuration directed the Windows PC's standard DNS queries to AdGuard Home.
+
+I then verified the assigned DNS server through PowerShell:
+
+```powershell
+Get-DnsClientServerAddress
+```
+
+To test DNS resolution using the configured default server, I ran:
+
+```powershell
+nslookup github.com
+```
+
+The output identified `172.16.0.57` as the DNS server and successfully returned a DNS answer for GitHub.
+
+![Windows default DNS validation](screenshots/phase-5-02-windows-default-dns-validation.png)
+
+*Figure 2 — Windows DNS configuration and nslookup output confirm that the client uses the Raspberry Pi DNS server.*
+
+**Result:** The Windows PC successfully used AdGuard Home for DNS resolution without requiring an explicit DNS server argument in the nslookup command.
+
+---
+
+#### Step 3 — Configure DNS Forwarding Through NETGEAR Orbi
+
+The next objective was to extend DNS filtering beyond the Windows PC to other devices on the home network.
+
+My home network uses a NETGEAR Orbi router with a gateway address of `172.16.0.1`.
+
+During configuration, I found that the available LAN DHCP settings did not provide the custom DNS distribution option I needed.
+
+Instead, I updated the DNS settings under the router's Internet Setup configuration to use the Raspberry Pi:
+
+```text
+Primary DNS Server: 172.16.0.57
+```
+
+This allowed the Orbi router to forward DNS queries from household devices to AdGuard Home.
+
+The resulting DNS path was:
+
+```text
+Household Devices
+       |
+       v
+NETGEAR Orbi Router
+172.16.0.1
+       |
+       v
+Raspberry Pi / AdGuard Home
+172.16.0.57:53
+       |
+       v
+Configured Upstream DNS Resolver
+       |
+       v
+DNS Response Returned to Client
+```
+
+At this stage of the project, AdGuard Home was using a Quad9 DNS-over-HTTPS upstream resolver.
+
+A local Unbound recursive resolver was introduced later in Phase 7.
+
+---
+
+#### Step 4 — Validate Household DNS Activity
+
+After updating the router's DNS settings, I reviewed the AdGuard Home dashboard and Query Log to verify that DNS requests were reaching the server.
+
+The results showed two different client behaviors:
+
+**Directly configured Windows PC**
+
+The Windows client appeared in AdGuard Home using its own address:
+
+```text
+172.16.0.74
+```
+
+**Devices using the Orbi DNS proxy**
+
+Requests forwarded through the router appeared under:
+
+```text
+172.16.0.1
+```
+
+This was an important distinction.
+
+Although household DNS queries reached AdGuard Home, the Orbi router's DNS forwarding behavior prevented AdGuard Home from identifying every device individually.
+
+As a result, router-forwarded devices were generally represented by the router's address rather than their individual client IP addresses.
+
+![Network-wide DNS validation](screenshots/phase-5-03-network-wide-dns-validation.png)
+
+*Figure 3 — AdGuard Home Query Log demonstrates DNS requests reaching the server from the directly configured Windows client and the Orbi router.*
+
+---
+
+#### Step 5 — Review DNS Configuration After Network Changes
+
+I reviewed the DNS configuration after the network changes to confirm that the Windows client continued to use the Raspberry Pi DNS server.
+
+The primary validation commands were:
+
+```powershell
+Get-DnsClientServerAddress
+```
+
+```powershell
+nslookup github.com
+```
+
+```powershell
+Test-NetConnection 172.16.0.57 -Port 53
+```
+
+These commands help verify:
+
+1. Which DNS server Windows is configured to use.
+2. Whether the configured DNS server resolves domain names.
+3. Whether the Raspberry Pi DNS service is reachable over TCP port 53.
+
+A screenshot captured after a router or client reboot may also document whether the configuration remained in place.
+
+However, reboot persistence should only be claimed when the evidence includes an actual reboot and successful post-reboot validation.
+
+---
+
+#### Challenges & Solutions
+
+**Challenge 1 — DNS worked locally but was not yet used by network clients.**
+
+**Solution:** Configured the Windows PC to use `172.16.0.57` as its preferred DNS server and validated resolution using nslookup.
+
+**Challenge 2 — The Orbi router did not expose the expected custom DNS option in its LAN DHCP settings.**
+
+**Solution:** Updated the router's Internet Setup DNS configuration to forward DNS requests to the Raspberry Pi.
+
+**Challenge 3 — AdGuard Home did not display every household device individually.**
+
+**Cause:** The Orbi router acted as a DNS proxy, forwarding queries under its own address.
+
+**Result:** Devices configured to use AdGuard Home directly could be identified individually, while router-forwarded requests were generally associated with `172.16.0.1`.
+
+This limitation became important when designing client-specific filtering policies in Phase 6.
+
+---
+
+#### Phase 5 Results
+
+By the end of this phase, I had successfully:
+
+- Verified Windows connectivity to the Raspberry Pi DNS service.
+- Configured Windows to use `172.16.0.57` as its preferred DNS server.
+- Confirmed successful default DNS resolution using nslookup.
+- Configured NETGEAR Orbi DNS forwarding to AdGuard Home.
+- Observed household DNS activity in the AdGuard Home Query Log.
+- Identified the difference between direct-client DNS requests and router-proxied requests.
+- Established the network foundation required for client-specific filtering.
+
+**Phase 5 Status: Complete**
+
+---
