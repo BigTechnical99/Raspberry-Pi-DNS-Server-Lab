@@ -424,3 +424,108 @@ By the end of this phase, I had successfully:
 **Phase 2 Status: Complete**
 
 ---
+
+# Phase 3 — Network Configuration and DHCP Reservation
+
+## Objective
+
+Give the Raspberry Pi DNS server a consistent address and confirm reliable wired connectivity before deploying AdGuard Home.
+
+## Network configuration
+
+| Setting | Value |
+| --- | --- |
+| Hostname | DNS-SERVER |
+| Wired interface | eth0 |
+| Reserved IPv4 address | 172.16.0.57 |
+| Subnet | 172.16.0.0/24 |
+| Default gateway | 172.16.0.1 |
+| Router | Netgear Orbi |
+
+These are private LAN addresses. They describe this lab and should not be copied into a different network without checking its configuration.
+
+## 1. Identify the Ethernet interface
+
+I checked the wired interface and its assigned IPv4 address:
+
+```bash
+ip link show eth0
+ip -4 addr show eth0
+```
+
+The recovered output shows eth0 in the UP state with address 172.16.0.57/24. The Ethernet hardware address was used to identify the correct adapter for the router reservation; it has been hidden in the published screenshot.
+
+![Ethernet interface validation](../screenshots/phase-3-03-ethernet-interface-validation.png)
+
+## 2. Reserve the address in Orbi
+
+I created a DHCP address reservation in the Orbi router for the Pi's Ethernet adapter, assigning 172.16.0.57.
+
+A DHCP reservation tells the router to keep assigning the same address to that adapter. The Pi still obtains its network settings through DHCP; this is different from configuring a static address directly on the Pi. A consistent address allows clients to keep using the Pi as their DNS server.
+
+Evidence note: the router reservation configuration screenshot was not recovered. The terminal validation below shows the assigned address but cannot independently prove the saved router setting.
+
+## 3. Reboot and verify SSH access
+
+After saving the reservation, I rebooted the Pi and reconnected using its reserved address:
+
+```bash
+sudo reboot
+```
+
+From the client computer:
+
+```text
+ssh <your-pi-username>@172.16.0.57
+```
+
+The original screenshot shows the reboot disconnect followed by a successful SSH login to 172.16.0.57. The username, local client path and SSH host fingerprint are redacted. The placeholder above is documentation, not a replacement for original command output.
+
+![Reboot and SSH validation](../screenshots/phase-3-02-reboot-ssh-validation.png)
+
+## 4. Verify the assigned address, route and internet access
+
+```bash
+ip -4 addr show eth0
+ip route
+ping -c 4 8.8.8.8
+```
+
+The recovered output shows:
+
+- Ethernet address: 172.16.0.57/24.
+- Ethernet default gateway: 172.16.0.1, with route metric 100.
+- Wi-Fi was still active at capture time, using 172.16.0.58 and default-route metric 600.
+- The Ethernet route had the lower metric and was preferred.
+- All four internet ping requests received replies, with 0% packet loss.
+
+![Address, route and connectivity validation](../screenshots/phase-3-01-dhcp-reservation-validation.png)
+
+The established filename is retained. This screenshot supports address, routing and connectivity validation; it does not display the router reservation itself.
+
+## 5. Use Ethernet for the DNS server
+
+Later in the project, I disabled Wi-Fi so the server used its wired connection:
+
+```bash
+sudo nmcli radio wifi off
+```
+
+The recovered Phase 3 images predate this change and do not prove Wi-Fi was disabled. No existing screenshot has been altered to suggest otherwise.
+
+A domain-name connectivity check can be documented separately with:
+
+```bash
+ping -c 4 google.com
+```
+
+The recovered Phase 2 network screenshot already shows a successful domain-name ping. No new Phase 3 domain-name test result is claimed here.
+
+## Outcome
+
+The Pi was reachable through SSH at 172.16.0.57 after reboot. Ethernet was active, its route was preferred in the captured output, and internet connectivity by IP address was confirmed. The router reservation and later Wi-Fi-disable action are recorded from the project history, with their screenshot gaps stated explicitly.
+
+## Missing evidence and optional new captures
+
+- Router reservation screen: not recovered. If captured now, show only the Pi's reservation and reserved IP. Hide MAC addresses, other devices, router account details, serial numbers and public IP information. Suggested new filename: phase-3-04-router-dhcp-reservation.png.
+- Wi-Fi-disabled validation: not recovered. If captured now, show `nmcli radio wifi`, `nmcli device status`, and `ip route`. Hide SSIDs, usernames and hardware addresses. Suggested new filename: phase-3-05-ethernet-only-validation.png.
