@@ -540,3 +540,99 @@ The recovered evidence shows the Orbi reservation for 172.16.0.57, successful SS
 | phase-3-05-ethernet-only-network-validation.png | Wi-Fi disabled, Ethernet connected, successful domain ping |
 
 Both previously listed Phase 3 screenshot gaps have been filled by recovered uploads. No screenshots were fabricated. The uploaded Ethernet-only image originally used number 02; its published filename is number 05 to preserve the original ZIP's existing 02 reboot image and prevent collisions. Unredacted originals and the redundant connected-device list are not included.
+
+# Phase 4 — AdGuard Home Installation and Configuration
+
+## Objective
+
+Deploy AdGuard Home on the Raspberry Pi, bind its services to Ethernet, and verify DNS resolution and controlled filtering.
+
+## Lab settings
+
+| Setting | Value |
+| --- | --- |
+| Host | DNS-SERVER, Raspberry Pi 4 |
+| Ethernet interface | eth0 |
+| Reserved address | 172.16.0.57 |
+| Installation directory | /opt/AdGuardHome |
+| Version recorded during setup | v0.107.79 |
+| Initial setup URL | http://172.16.0.57:3000 |
+| Configured admin URL | http://172.16.0.57/ |
+| DNS service | UDP and TCP port 53 |
+
+This document records the existing lab. Commands below describe validation steps; they are not newly executed test results.
+
+## 1. Install AdGuard Home
+
+I used the AdGuard Home installation script for the Raspberry Pi's ARM64 environment. The project conversation records installation in /opt/AdGuardHome, automatic service startup and the initial setup address http://172.16.0.57:3000.
+
+The original installer screenshot was not recovered. The historical shell command was only partially retrieved, so it is not reconstructed here. The later service-status screenshot independently confirms AdGuard Home v0.107.79 was running.
+
+## 2. Configure web and DNS interfaces
+
+In the setup wizard, I selected the Ethernet interface for both services:
+
+- Admin Web Interface: eth0 / 172.16.0.57, port 80.
+- DNS server: eth0 / 172.16.0.57, port 53.
+
+The web interface moved from the initial setup port 3000 to the configured HTTP port 80. The DHCP reservation documented in Phase 3 provides the consistent address needed by clients.
+
+![Web and DNS interface settings](screenshots/phase-4-06-web-dns-interface-settings.png)
+
+This screenshot shows the wizard settings before completion. The later socket output confirms the running services were bound to 172.16.0.57.
+
+An administrator account was configured during setup. Credentials are intentionally excluded; the account-creation screen was not recovered.
+
+## 3. Validate the running service and listening ports
+
+From the installation directory, the service status can be checked with:
+
+```bash
+cd /opt/AdGuardHome
+sudo ./AdGuardHome -s status
+```
+
+I checked listening sockets and queried the DNS server directly:
+
+```bash
+sudo ss -tulpn | grep -E ':53 |:80 '
+nslookup example.com 172.16.0.57
+```
+
+The recovered terminal screenshot shows:
+
+- AdGuard Home service status: running.
+- UDP 172.16.0.57:53 and TCP 172.16.0.57:53 owned by AdGuardHome.
+- TCP 172.16.0.57:80 for the web interface.
+- An example.com response containing IPv4 and IPv6 answers from DNS server 172.16.0.57.
+- eth0 connected and wlan0 unavailable.
+
+![DNS service and resolution validation](screenshots/phase-4-02-dns-service-validation.png)
+
+During the original work, nslookup was initially unavailable; dnsutils was installed before the lookup tests. The screenshot above shows the later successful lookup, not the package-install step. Resolved website addresses are historical and can change.
+
+## 4. Confirm requests in the Query Log
+
+I opened the AdGuard Home Query Log to verify that the server recorded the test requests. The recovered image shows example.com A and AAAA requests marked Processed, with the client identified as DNS-SERVER at 172.16.0.57.
+
+![Processed test queries](screenshots/phase-4-03-adguard-query-log.png)
+
+These requests came from the Pi itself. This proves local direct-query processing; it does not establish that every household device was using AdGuard Home.
+
+## 5. Validate filtering with a controlled test
+
+I used example.org for a controlled blocking test. The recovered Query Log shows its A and AAAA requests marked Blocked by Custom filtering rules, alongside processed example.com requests.
+
+![Controlled DNS filtering test](screenshots/phase-4-04-dns-filtering-validation.png)
+
+This demonstrates the custom rule was applied to the test domain. It is not evidence that example.org is malicious, or a benchmark of general ad blocking. The exact custom-rule text and the corresponding terminal blocked response were not recovered in this image set.
+
+## 6. Reboot persistence evidence
+
+The historical Phase 4 outline included a reboot-persistence check. The recovered terminal image shows a running service and working DNS, but does not display the reboot and reconnect sequence. I therefore do not present it as proof of persistence across reboot.
+
+Original screenshot unavailable: phase-4-05-reboot-persistence-validation.png.
+
+## Outcome
+
+The recovered screenshots confirm Ethernet-bound admin and DNS settings, a running AdGuard Home service, UDP/TCP DNS listeners, successful direct DNS resolution, query logging and a controlled custom-rule block. Installation details are recorded from the project conversation; installer and reboot-sequence images remain unavailable.
