@@ -647,11 +647,11 @@ The test queries shown came from the Pi itself. They do not establish that every
 All six screenshot files are available. The reboot and reconnect sequence itself is not shown, so reboot persistence remains unverified by these images alone. Administrator-account creation, the dnsutils package installation and the exact custom-filter rule text are not pictured. No images or command output were fabricated to fill these gaps.
 
 Usernames are redacted in the published terminal images. The installer image retains its existing redaction. Private LAN addresses, generic hostnames and public test domains remain visible to explain the lab.
+---
 
+# Phase 5 — Network-Wide DNS Integration
 
-### Phase 5 — Network-Wide DNS Integration
-
-#### Objective
+## Objective
 
 The objective of this phase was to expand AdGuard Home from a working local DNS service into a DNS filtering solution used by devices on the home network.
 
@@ -663,7 +663,7 @@ To address this, I configured a Windows client to use the Raspberry Pi directly 
 
 ---
 
-#### Step 1 — Verify DNS Service Accessibility from Windows
+## Step 1 — Verify DNS Service Accessibility from Windows
 
 Before changing the Windows DNS configuration, I verified that the Raspberry Pi was reachable on the network and that TCP port 53 was accessible.
 
@@ -700,7 +700,8 @@ This confirmed that the Windows computer could establish a TCP connection to the
 
 ---
 
-#### Step 2 — Configure Windows to Use AdGuard Home
+## Step 2 — Configure Windows to Use AdGuard Home
+
 
 After verifying connectivity, I configured the Windows PC to use the Raspberry Pi as its preferred DNS server.
 
@@ -742,7 +743,7 @@ The output identified `172.16.0.57` as the DNS server and successfully returned 
 
 ---
 
-#### Step 3 — Configure DNS Forwarding Through NETGEAR Orbi
+## Step 3 — Configure DNS Forwarding Through NETGEAR Orbi
 
 The next objective was to extend DNS filtering beyond the Windows PC to other devices on the home network.
 
@@ -784,7 +785,7 @@ A local Unbound recursive resolver was introduced later in Phase 7.
 
 ---
 
-#### Step 4 — Validate Household DNS Activity
+## Step 4 — Validate Household DNS Activity
 
 After updating the router's DNS settings, I reviewed the AdGuard Home dashboard and Query Log to verify that DNS requests were reaching the server.
 
@@ -818,7 +819,7 @@ As a result, router-forwarded devices were generally represented by the router's
 
 ---
 
-#### Step 5 — Review DNS Configuration After Network Changes
+## Step 5 — Review DNS Configuration After Network Changes
 
 I reviewed the DNS configuration after the network changes to confirm that the Windows client continued to use the Raspberry Pi DNS server.
 
@@ -848,7 +849,7 @@ However, reboot persistence should only be claimed when the evidence includes an
 
 ---
 
-#### Challenges & Solutions
+## Challenges & Solutions
 
 **Challenge 1 — DNS worked locally but was not yet used by network clients.**
 
@@ -868,7 +869,7 @@ This limitation became important when designing client-specific filtering polici
 
 ---
 
-#### Phase 5 Results
+## Phase 5 Results
 
 By the end of this phase, I had successfully:
 
