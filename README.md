@@ -1125,7 +1125,7 @@ Observed results:
 
 The successful response demonstrates that Unbound answered an IPv4 DNS lookup on its configured local port.
 
-![Direct Unbound DNS resolution](screenshots/phase-7-04-unbound-dns-resolution.png.png)
+![Direct Unbound DNS resolution](screenshots/phase-7-04-unbound-dns-resolution.png)
 
 *Figure 4 — Successful example.com resolution through Unbound at 127.0.0.1:5335.*
 
@@ -1147,7 +1147,7 @@ This establishes that AdGuard Home was configured to send upstream DNS requests 
 
 A configuration screenshot alone does not trace the network path of individual DNS queries.
 
-![AdGuard Home upstream DNS configuration](screenshots/phase-7-05-adguard-unbound-integration.png)
+![AdGuard Home upstream DNS configuration](screenshots/phase-7-05-adguard-unbound-integration.png.png)
 
 *Figure 5 — AdGuard Home configured to use the local Unbound resolver on port 5335.*
 
