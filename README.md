@@ -1147,7 +1147,7 @@ This establishes that AdGuard Home was configured to send upstream DNS requests 
 
 A configuration screenshot alone does not trace the network path of individual DNS queries.
 
-![AdGuard Home upstream DNS configuration](screenshots/phase-7-05-adguard-unbound-integration.png.png)
+![AdGuard Home upstream DNS configuration](screenshots/phase-7-05-adguard-unbound-integration.png)
 
 *Figure 5 — AdGuard Home configured to use the local Unbound resolver on port 5335.*
 
