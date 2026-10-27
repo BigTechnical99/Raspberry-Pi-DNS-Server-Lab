@@ -1346,7 +1346,7 @@ sudo systemctl status unattended-upgrades --no-pager
 
 The service was **loaded**, **enabled**, and **active (running)**. Its systemd description was **Unattended Upgrades Shutdown**.
 
-![Unattended-upgrades service status](screenshots/phase-8-03-automatic-updates-service.png)
+![Unattended-upgrades service status](screenshots/phase-8-03-automatic-updates-validation.png)
 
 *Figure 3 — Unattended Upgrades Shutdown service is enabled and running.*
 
