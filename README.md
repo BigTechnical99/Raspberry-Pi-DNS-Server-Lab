@@ -1076,7 +1076,7 @@ The observed process ID was `36032`.
 
 This local-only listener separates Unbound from AdGuard Home's client-facing port 53 and avoids exposing Unbound directly on the LAN through this socket.
 
-![Unbound listener validation](screenshots/phase-7-02-unbound-listener-validation.png.png)
+![Unbound listener validation](screenshots/phase-7-02-unbound-listener-validation.png)
 
 *Figure 2 — TCP and UDP listeners bound to the loopback address on port 5335.*
 
