@@ -1204,7 +1204,7 @@ The `ad` flag indicates that the response was marked as authenticated.
 
 Combined with the upstream setting and direct Unbound tests, this supports the intended integration; it does not independently trace every resolver hop.
 
-![End-to-end DNS resolution through AdGuard Home](screenshots/phase-7-07-end-to-end-dns-validation.png)
+![End-to-end DNS resolution through AdGuard Home](screenshots/phase-7-07-end-to-end-dns-validation.png.png)
 
 *Figure 7 — Successful DNS resolution through AdGuard Home at 172.16.0.57:53.*
 
