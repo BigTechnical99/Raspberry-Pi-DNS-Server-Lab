@@ -1054,7 +1054,7 @@ The log identified Unbound **1.26.2**, with the `validator` and `iterator` modul
 
 The observed service start was October 24, 2026, at 06:43 EDT.
 
-![Unbound service health](screenshots/phase-7-01-unbound-service-health.png)
+![Unbound service health](screenshots/phase-7-01-unbound-service-health.png.png)
 
 *Figure 1 — Unbound service running, enabled, and reporting validator/iterator initialization.*
 
@@ -1098,7 +1098,7 @@ unbound-checkconf: no errors in /etc/unbound/unbound.conf
 
 This confirms the configuration passed Unbound's validation check; it does not by itself demonstrate successful DNS queries.
 
-![Unbound configuration validation](screenshots/phase-7-03-unbound-configuration-validation.png)
+![Unbound configuration validation](screenshots/phase-7-03-unbound-configuration-validation.png.png)
 
 *Figure 3 — Unbound reports no configuration errors.*
 
@@ -1125,7 +1125,7 @@ Observed results:
 
 The successful response demonstrates that Unbound answered an IPv4 DNS lookup on its configured local port.
 
-![Direct Unbound DNS resolution](screenshots/phase-7-04-unbound-dns-resolution.png)
+![Direct Unbound DNS resolution](screenshots/phase-7-04-unbound-dns-resolution.png.png)
 
 *Figure 4 — Successful example.com resolution through Unbound at 127.0.0.1:5335.*
 
@@ -1147,7 +1147,7 @@ This establishes that AdGuard Home was configured to send upstream DNS requests 
 
 A configuration screenshot alone does not trace the network path of individual DNS queries.
 
-![AdGuard Home upstream DNS configuration](screenshots/phase-7-05-adguard-unbound-integration.png)
+![AdGuard Home upstream DNS configuration](screenshots/phase-7-05-adguard-unbound-integration.png.png)
 
 *Figure 5 — AdGuard Home configured to use the local Unbound resolver on port 5335.*
 
@@ -1173,7 +1173,7 @@ Together, these results provide strong evidence of functioning DNSSEC validation
 
 The positive response did not visibly contain the `ad` flag, so the conclusion relies on the paired positive/negative test behavior rather than claiming that the flag was observed.
 
-![DNSSEC positive and negative validation](screenshots/phase-7-06-dnssec-validation.png)
+![DNSSEC positive and negative validation](screenshots/phase-7-06-dnssec-validation.png.png)
 
 *Figure 6 — Signed-domain resolution succeeds while the deliberately invalid DNSSEC domain returns SERVFAIL.*
 
