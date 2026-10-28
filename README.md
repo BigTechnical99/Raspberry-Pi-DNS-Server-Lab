@@ -2791,3 +2791,43 @@ The project README, script, dedicated validation document, and terminal screensh
 **Final portfolio review:** The on-device health-check evidence is documented. Broader repository presentation and documentation review may continue.
 
 ---
+
+## 🏁 Final Project Summary
+
+This Raspberry Pi DNS Security Lab demonstrates the deployment, security hardening, validation, and operational monitoring of a dedicated DNS infrastructure server on a home network. Using **Raspberry Pi OS Lite (64-bit)**, **AdGuard Home**, and **Unbound**, I built a system that filters DNS requests, supports client-specific protection policies, and performs local recursive DNS resolution with DNSSEC validation.
+
+Across **Phases 2–11**, I deployed and configured the headless Linux host, established Ethernet connectivity and a router-side DHCP reservation, integrated DNS services with the NETGEAR Orbi network, applied SSH key-based authentication and UFW restrictions, configured unattended security updates, and validated DNS behavior using Linux and Windows diagnostic tools. I documented the implementation through commands, screenshots, test results, and troubleshooting notes.
+
+### Verified Outcomes
+
+| Area | Documented result |
+|---|---|
+| DNS infrastructure | AdGuard Home listening at `172.16.0.57:53`, with Unbound at `127.0.0.1:5335` |
+| DNS filtering | **71,873 queries** observed in a 24-hour dashboard period; **18,328 blocked** (approximately **25.5%**) |
+| Client-side DNS testing | **10 of 10** PowerShell DNS lookups succeeded; measured mean **13.32 ms** |
+| Security controls | SSH public-key authentication, UFW access restrictions, and unattended security updates configured and validated |
+| System monitoring | Service health, resource utilization, DNS logs, and query performance inspected |
+| Bash health-check validation | **5/5 checks passed**, **0 failures**, **0 warnings** during the Phase 11 on-device run |
+| Evidence and documentation | **62 screenshot references** in the README, plus a committed Bash script and dedicated Phase 11 validation report |
+
+### Troubleshooting and Engineering Decisions
+
+The project included diagnosing failed microSD media, validating network addressing and DNS forwarding, examining upstream and reverse DNS settings, and investigating router DNS Service Discovery timeouts. Standard router PTR lookups succeeded, while a specific DNS-SD query timed out over both UDP and TCP. I preserved that finding as an **unresolved limitation**, rather than claiming a fix that the evidence does not support.
+
+### Skills Demonstrated
+
+- **Linux and infrastructure administration:** Headless deployment, SSH, systemd, software updates, and resource monitoring.
+- **Networking and DNS:** DHCP reservations, DNS forwarding, recursive resolution, DNSSEC, TCP/UDP diagnostics, and client troubleshooting.
+- **Security:** Key-based remote access, firewall restrictions, DNS filtering policies, and verification of controls.
+- **Scripting and operations:** Read-only Bash health checks, command-line diagnostics, and evidence-based monitoring.
+- **Documentation:** Reproducible procedures, measured results, annotated screenshots, and transparent reporting of limitations.
+
+### Conclusion
+
+This lab provided practical experience operating and troubleshooting a Linux-based network service rather than only installing software. The completed phases show how I approached infrastructure deployment, tested system behavior, investigated unexpected results, and documented operational evidence. These skills are directly relevant to **cloud infrastructure, data center operations, network engineering, and security-focused IT support**.
+
+The results represent specific test periods, not a guarantee of continuous availability or production-scale performance. Future extensions could include scheduled health checks, alerting, configuration backups, and longer-term availability measurements.
+
+**Project Status: Phases 2–11 documented; Phase 11 health-check validation complete.**
+
+---
