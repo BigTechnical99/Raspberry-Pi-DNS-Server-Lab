@@ -227,6 +227,16 @@ The deployment configuration included:
 
 The goal was to deploy the Raspberry Pi without requiring a dedicated monitor, keyboard, or mouse.
 
+**Additional imaging evidence:**
+
+![Raspberry Pi Imager storage selection](screenshots/phase-2-05-storage-selection.png)
+
+*Supplemental screenshot — Storage selection during Raspberry Pi OS preparation.*
+
+![Raspberry Pi Imager settings review](screenshots/phase-2-05-imaging-settings-review.png)
+
+*Supplemental screenshot — Imaging settings review before installation.*
+
 During the initial imaging attempts on macOS, Raspberry Pi Imager repeatedly failed during the verification stage.
 
 ![Raspberry Pi imaging verification failure](screenshots/phase-2-01-imaging-verification-failure.png)
@@ -261,7 +271,7 @@ This explained why the operating system image repeatedly failed verification.
 
 *Figure 2 — H2testw identified data loss, corruption, and overwritten data on the original microSD card.*
 
-**Troubleshooting Outcome:** The original microSD card was identified as defective and removed from the deployment process.(Original screenshot unavailable. During testing, H2testw reported approximately 2.4 GB of data loss on the original microSD card. I replaced the card and confirmed the replacement passed testing.)
+**Troubleshooting Outcome:** The original microSD card was identified as defective and removed from the deployment process. The recorded H2testw results showed approximately 2.4 GB of data loss. I replaced the card and confirmed the replacement passed testing.
 
 ---
 
@@ -310,6 +320,10 @@ After installation, I inserted the microSD card into the Raspberry Pi 4, connect
 #### Step 5 — Establish Headless SSH Access
 
 After the Raspberry Pi booted, I connected to the server remotely from my Windows PC using SSH.
+
+![Initial Raspberry Pi ping and SSH prompt](screenshots/phase-2-06-initial-ping-ssh-prompt.png)
+
+*Supplemental screenshot — Initial network reachability and SSH connection prompt.*
 
 ```powershell
 ssh <username>@dns-server.local
@@ -365,6 +379,10 @@ cat /etc/os-release
 
 The system was running Raspberry Pi OS Lite based on Debian 13 with an updated Raspberry Pi kernel.
 
+![Operating system upgrade output](screenshots/phase-2-08-upgrade-output.png)
+
+*Supplemental screenshot — Operating system upgrade output.*
+
 ---
 
 #### Step 7 — Validate System Health
@@ -409,6 +427,10 @@ ping -c 4 google.com
 ```
 
 The connectivity test completed successfully.
+
+![Network connectivity validation](screenshots/phase-2-07-network-connectivity-validation.png)
+
+*Supplemental screenshot — Network connectivity validation during deployment.*
 
 ![Post-upgrade system health validation](screenshots/phase-2-08-post-upgrade-system-health.png)
 
