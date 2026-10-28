@@ -156,6 +156,7 @@ A failed check exits with status `1`, while a run with no failed checks exits wi
   - [Phase 8 — SSH Hardening & System Security](#phase-8--ssh-hardening--system-security)
   - [Phase 9 — DNS Security Testing & Validation](#phase-9--dns-security-testing--validation)
   - [Phase 10 — Monitoring, Logging & Performance Metrics](#phase-10--monitoring-logging--performance-metrics)
+  - [Phase 11 — Final GitHub Documentation & Portfolio Review](#phase-11--final-github-documentation--portfolio-review)
 
 *Phase 1 planning and requirements are described in the project overview and objectives; detailed step-by-step documentation begins with Phase 2.*
 ---
@@ -2720,3 +2721,73 @@ This phase demonstrates practical experience with:
 
 ---
 
+### Phase 11 — Final GitHub Documentation & Portfolio Review
+
+#### Objective
+
+Consolidate the Raspberry Pi DNS Security Lab into an evidence-backed GitHub portfolio project and validate the repository's read-only Bash DNS health-check utility on the actual server.
+
+#### Step 1 — Validate the SSH Administration Shortcut
+
+Configured a Windows OpenSSH client alias named `dns-server` pointing to `172.16.0.57`, using the existing `dns-server_ed25519` private key and the `himothy_taylor99` Linux account.
+
+The alias was verified with `ssh -G dns-server` and a successful interactive connection:
+
+```powershell
+ssh dns-server
+```
+
+The private key itself is not included in the repository.
+
+#### Step 2 — Download and Execute the Bash Health Check
+
+Downloaded the repository's [read-only DNS health-check script](scripts/dns-health-check.sh) onto the Raspberry Pi and ran it against the configured AdGuard Home listener:
+
+```bash
+DNS_SERVER=172.16.0.57 bash ~/dns-lab/scripts/dns-health-check.sh
+```
+
+The observed run was recorded on **October 27, 2026 at 21:31:55 -04:00** on `DNS-SERVER`.
+
+#### Step 3 — Review the Actual Results
+
+| Validation | Observed result | Status |
+|---|---|---|
+| AdGuard Home systemd service | Active (`AdGuardHome.service`) | PASS |
+| Unbound systemd service | Active (`unbound.service`) | PASS |
+| SSH systemd service | Active (`ssh.service`) | PASS |
+| AdGuard Home DNS lookup | `example.com` resolved via `172.16.0.57:53` | PASS |
+| Unbound DNS lookup | `example.com` resolved via `127.0.0.1:5335` | PASS |
+| Script summary | 0 failures, 0 warnings | PASS |
+
+##### System Resource Snapshot
+
+| Metric | Observed value |
+|---|---|
+| Uptime | 2 hours, 43 minutes |
+| RAM used / available | 289 MiB used / 1.5 GiB available |
+| Swap used | 0 B |
+| Root filesystem | 4.3 GB of 59 GB used (8%) |
+| CPU temperature | 52.095 °C |
+
+#### Step 4 — Capture and Publish Evidence
+
+The successful terminal output was captured and committed to the repository.
+
+![Phase 11 DNS health-check script successful execution](screenshots/phase11-dns-health-check-success.png)
+
+*Figure 1 — On-device DNS health check showing all five passing checks, system resource measurements, and zero failures or warnings.*
+
+For the full command output, interpretation, and evidence limitations, see [Phase 11 — DNS Health-Check Validation](docs/11-health-check-validation.md).
+
+#### Phase 11 Results and Limitations
+
+The script was successfully validated on the live Raspberry Pi. Its service and DNS checks confirm the observed state at the moment of testing; they do not establish continuous uptime, automated alerting, DNSSEC behavior, or performance under sustained load. The router DNS Service Discovery timeouts investigated in Phase 10 remain a separate unresolved observation.
+
+The project README, script, dedicated validation document, and terminal screenshot now provide reproducible evidence of Bash scripting, Linux service administration, DNS diagnostics, SSH access, and technical documentation.
+
+**Phase 11 Health-Check Validation Status: Complete (5/5 checks passed).**
+
+**Final portfolio review:** The on-device health-check evidence is documented. Broader repository presentation and documentation review may continue.
+
+---
