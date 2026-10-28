@@ -52,7 +52,7 @@ This hands-on project covers headless Linux deployment, router and client DNS co
 | SSH / OpenSSH | Secure remote server administration |
 | UFW | Host-based firewall and network access restrictions |
 | NetworkManager | Network interface configuration and management |
-| Bash | Linux command-line administration and shell scripting (automated health-check script planned) |
+| Bash | Read-only DNS health-check script (repository code; Raspberry Pi execution pending) |
 | systemd / journalctl | Service management and log analysis |
 | dig / nslookup | DNS resolution and troubleshooting |
 | GitHub | Project documentation and version control |
@@ -86,8 +86,8 @@ The project focused on the following goals:
 7. **Validate DNS Functionality and Security**  
    Test DNS resolution, DNSSEC validation, caching, firewall restrictions, TCP/UDP DNS connectivity, and service recovery.
 
-8. **Plan Automated Monitoring**  
-   Identify checks for service availability, DNS resolution, Internet connectivity, system resources, and resolver statistics. A reusable Bash health-check script is a planned enhancement, not a verified repository deliverable.
+8. **Develop a Health-Check Script**  
+   Add a read-only Bash script for service availability, DNS resolution, and system resources. The script is committed to the repository but has not yet been validated on the Raspberry Pi.
 
 9. **Document Troubleshooting and Results**  
    Record configuration decisions, technical challenges, troubleshooting procedures, and final validation results.
@@ -110,8 +110,30 @@ The project focused on the following goals:
 - UFW firewall restricting inbound access to the home LAN
 - Unbound restricted to the local loopback interface
 - Automatic security updates
-- Manual service health, DNS performance, and system resource monitoring
+- Manual monitoring and a repository-based Bash health-check script (on-device validation pending)
 - Documented troubleshooting and validation procedures
+
+---
+
+## 🩺 Bash Health-Check Script
+
+A read-only health-check utility is available at [`scripts/dns-health-check.sh`](scripts/dns-health-check.sh). It checks systemd service status, performs DNS A-record lookups through AdGuard Home and Unbound, and displays system resource information.
+
+**Current evidence status:** Script committed to GitHub; execution on the Raspberry Pi has **not yet been verified**. Do not treat its expected output as an observed lab result.
+
+To test it on the Raspberry Pi after obtaining the script from this repository:
+
+```bash
+bash scripts/dns-health-check.sh
+```
+
+Run the command from the repository root. The script requires Bash, `systemctl`, and `dig` (provided by `dnsutils`); it does not require root access for the intended checks. If the Pi's services use different systemd unit names, update the service names in the script before running it. It defaults to `127.0.0.1:53` for AdGuard Home and `127.0.0.1:5335` for Unbound; the AdGuard Home listener may need to be set to the Pi's LAN address:
+
+```bash
+DNS_SERVER=172.16.0.57 bash scripts/dns-health-check.sh
+```
+
+A failed check exits with status `1`, while a run with no failed checks exits with status `0` (warnings are reported separately). Review the output and capture a screenshot only after actually running it on the device.
 
 ---
 
@@ -122,6 +144,7 @@ The project focused on the following goals:
 - [Technologies & Hardware](#-technologies--hardware)
 - [Project Objectives](#-project-objectives)
 - [Key Features](#-key-features)
+- [Bash Health-Check Script](#-bash-health-check-script)
 - [Network Architecture](#-network-architecture)
 - [Detailed Build & Testing](#-the-process)
   - [Phase 2 — Raspberry Pi OS Deployment](#phase-2--raspberry-pi-os-deployment)
