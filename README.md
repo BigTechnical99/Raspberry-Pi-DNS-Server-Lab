@@ -1,20 +1,37 @@
-
 # 🛡️ Raspberry Pi DNS Security Lab
 
-### Network-Wide DNS Filtering, Recursive Resolution & Security Hardening
+### Linux Administration | DNS Security | Network Engineering | Infrastructure Monitoring
 
-A self-hosted DNS security infrastructure project built using a Raspberry Pi 4, AdGuard Home, and Unbound.
+Built and secured a **Raspberry Pi 4 DNS infrastructure server** for my home network using **AdGuard Home** for network-wide DNS filtering and **Unbound** for local recursive resolution and DNSSEC validation.
 
-The goal of this project was to design, deploy, secure, and maintain a DNS server capable of providing network-wide ad blocking, DNS-based threat filtering, client-specific security policies, and recursive DNS resolution for devices connected to my home network.
+This hands-on project covers headless Linux deployment, router and client DNS configuration, SSH key authentication, firewall hardening, automated security updates, functional testing, performance monitoring, and evidence-based troubleshooting. The detailed implementation below includes commands, real test results, and screenshots.
 
-Rather than relying entirely on external DNS providers, I configured **Unbound as a local recursive DNS resolver**, integrated it with **AdGuard Home for filtering and query monitoring**, and implemented Linux security controls to protect the server.
+## 📊 Project at a Glance
 
-Throughout the project, I documented the deployment process, encountered and resolved hardware and networking issues, validated DNS functionality, and developed a Bash script to automate routine server health checks.
+| Area | Implementation or observed result |
+|---|---|
+| DNS services | AdGuard Home at `172.16.0.57:53` with Unbound at `127.0.0.1:5335` |
+| Network integration | NETGEAR Orbi router forwarding and directly configured Windows client |
+| Security | DNSSEC validation, SSH key-only authentication, UFW LAN restrictions, unattended upgrades |
+| DNS activity | **71,873 queries** in the observed 24-hour dashboard period |
+| Filtering | **18,328 blocked queries** (approximately **25.5%**) |
+| Windows DNS benchmark | **10/10 successful lookups**; **13.32 ms** mean, **~1.39 ms** mean for tests 2–10 |
+| Server health | **17 days, 11 hours** uptime at measurement; **51.1°C** CPU temperature |
+| Troubleshooting | Standard router PTR lookups succeeded; one DNS-SD query timed out over UDP and TCP |
 
-This project demonstrates practical experience in **Linux system administration, computer networking, DNS infrastructure, cybersecurity fundamentals, troubleshooting, and automation**.
+*Metrics are snapshots from documented tests, not guarantees of ongoing availability or performance. The DNS-SD timeout's underlying cause remains unresolved.*
+
+## 🔎 What This Project Demonstrates
+
+- **Infrastructure deployment:** Raspberry Pi OS Lite, Ethernet networking, DHCP reservation, and headless SSH administration.
+- **DNS engineering:** AdGuard Home filtering, local Unbound recursive resolution, caching, DNSSEC, and client-specific policies.
+- **Security operations:** SSH hardening, UFW access controls, automatic updates, and functional security verification.
+- **Monitoring and troubleshooting:** DNS query logs, PowerShell lookup benchmarks, Linux resource checks, `journalctl`, and `dig` over UDP/TCP.
+- **Technical communication:** Reproducible commands, screenshots, measured outcomes, and clearly documented limitations.
+
+**Start here:** [Network architecture](#-network-architecture) · [Detailed build and testing](#-the-process) · [Project results](#-project-results)
 
 ---
-
 ## 📦 Technologies & Hardware
 
 ### Hardware
