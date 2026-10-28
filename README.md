@@ -29,7 +29,7 @@ This hands-on project covers headless Linux deployment, router and client DNS co
 - **Monitoring and troubleshooting:** DNS query logs, PowerShell lookup benchmarks, Linux resource checks, `journalctl`, and `dig` over UDP/TCP.
 - **Technical communication:** Reproducible commands, screenshots, measured outcomes, and clearly documented limitations.
 
-**Start here:** [Network architecture](#-network-architecture) · [Detailed build and testing](#-the-process) · [Project results](#-project-results)
+**Start here:** [Network architecture](#-network-architecture) · [Detailed build and testing](#-the-process) · [Phase 10 results](#phase-10-results)
 
 ---
 ## 📦 Technologies & Hardware
@@ -52,7 +52,7 @@ This hands-on project covers headless Linux deployment, router and client DNS co
 | SSH / OpenSSH | Secure remote server administration |
 | UFW | Host-based firewall and network access restrictions |
 | NetworkManager | Network interface configuration and management |
-| Bash | Automated server health checks |
+| Bash | Linux command-line administration and shell scripting (automated health-check script planned) |
 | systemd / journalctl | Service management and log analysis |
 | dig / nslookup | DNS resolution and troubleshooting |
 | GitHub | Project documentation and version control |
@@ -86,8 +86,8 @@ The project focused on the following goals:
 7. **Validate DNS Functionality and Security**  
    Test DNS resolution, DNSSEC validation, caching, firewall restrictions, TCP/UDP DNS connectivity, and service recovery.
 
-8. **Develop Automated Monitoring**  
-   Create a Bash script to check service availability, DNS resolution, Internet connectivity, system resources, and resolver statistics.
+8. **Plan Automated Monitoring**  
+   Identify checks for service availability, DNS resolution, Internet connectivity, system resources, and resolver statistics. A reusable Bash health-check script is a planned enhancement, not a verified repository deliverable.
 
 9. **Document Troubleshooting and Results**  
    Record configuration decisions, technical challenges, troubleshooting procedures, and final validation results.
@@ -110,7 +110,7 @@ The project focused on the following goals:
 - UFW firewall restricting inbound access to the home LAN
 - Unbound restricted to the local loopback interface
 - Automatic security updates
-- Automated Bash health-check script
+- Manual service health, DNS performance, and system resource monitoring
 - Documented troubleshooting and validation procedures
 
 ---
