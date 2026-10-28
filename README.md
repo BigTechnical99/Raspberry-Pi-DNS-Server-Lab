@@ -117,18 +117,24 @@ The project focused on the following goals:
 
 ## 📑 Table of Contents
 
-1. [Project Overview](#-raspberry-pi-dns-security-lab)
-2. [Technologies & Hardware](#-technologies--hardware)
-3. [Project Objectives](#-project-objectives)
-4. [Key Features](#-key-features)
-5. [Network Architecture](#-network-architecture)
-6. [The Process](#-the-process)
-7. [Challenges & Solutions](#-challenges--solutions)
-8. [What I Learned](#-what-i-learned)
-9. [Project Results](#-project-results)
-10. [Future Improvements](#-future-improvements)
-11. [Running & Maintaining the Project](#-running--maintaining-the-project)
+- [Project at a Glance](#-project-at-a-glance)
+- [What This Project Demonstrates](#-what-this-project-demonstrates)
+- [Technologies & Hardware](#-technologies--hardware)
+- [Project Objectives](#-project-objectives)
+- [Key Features](#-key-features)
+- [Network Architecture](#-network-architecture)
+- [Detailed Build & Testing](#-the-process)
+  - [Phase 2 — Raspberry Pi OS Deployment](#phase-2--raspberry-pi-os-deployment)
+  - [Phase 3 — Network Configuration and DHCP Reservation](#phase-3--network-configuration-and-dhcp-reservation)
+  - [Phase 4 — AdGuard Home Installation and Configuration](#phase-4--adguard-home-installation-and-configuration)
+  - [Phase 5 — Network-Wide DNS Integration](#phase-5--network-wide-dns-integration)
+  - [Phase 6 — Client-Specific DNS Filtering & Family Protection](#phase-6--client-specific-dns-filtering--family-protection)
+  - [Phase 7 — Unbound Recursive DNS & DNSSEC](#phase-7--unbound-recursive-dns--dnssec)
+  - [Phase 8 — SSH Hardening & System Security](#phase-8--ssh-hardening--system-security)
+  - [Phase 9 — DNS Security Testing & Validation](#phase-9--dns-security-testing--validation)
+  - [Phase 10 — Monitoring, Logging & Performance Metrics](#phase-10--monitoring-logging--performance-metrics)
 
+*Phase 1 planning and requirements are described in the project overview and objectives; detailed step-by-step documentation begins with Phase 2.*
 ---
 
 ## 🌐 Network Architecture
@@ -442,13 +448,13 @@ By the end of this phase, I had successfully:
 
 ---
 
-# Phase 3 — Network Configuration and DHCP Reservation
+### Phase 3 — Network Configuration and DHCP Reservation
 
-## Objective
+#### Objective
 
 Give the Raspberry Pi DNS server a consistent address and confirm reliable wired connectivity before deploying AdGuard Home.
 
-## Network configuration
+#### Network configuration
 
 | Setting | Value |
 | --- | --- |
@@ -461,7 +467,7 @@ Give the Raspberry Pi DNS server a consistent address and confirm reliable wired
 
 These are private LAN addresses. They describe this lab and should not be copied into a different network without checking its configuration.
 
-## 1. Identify the Ethernet interface
+#### 1. Identify the Ethernet interface
 
 I checked the wired interface and its assigned IPv4 address:
 
@@ -474,7 +480,7 @@ The recovered output shows eth0 in the UP state with address 172.16.0.57/24. The
 
 ![Ethernet interface validation](screenshots/phase-3-03-ethernet-interface-validation.png)
 
-## 2. Reserve the address in Orbi
+#### 2. Reserve the address in Orbi
 
 I created a DHCP address reservation in the Orbi router for the Pi's Ethernet adapter, assigning 172.16.0.57.
 
@@ -484,7 +490,7 @@ The recovered Orbi Address Reservation table shows DNS-SERVER reserved at 172.16
 
 ![Orbi DHCP address reservation](screenshots/phase-3-04-router-dhcp-reservation.png)
 
-## 3. Reboot and verify SSH access
+#### 3. Reboot and verify SSH access
 
 After saving the reservation, I rebooted the Pi and reconnected using its reserved address:
 
@@ -502,7 +508,7 @@ The original screenshot shows the reboot disconnect followed by a successful SSH
 
 ![Reboot and SSH validation](screenshots/phase-3-02-reboot-ssh-validation.png)
 
-## 4. Verify the assigned address, route and internet access
+#### 4. Verify the assigned address, route and internet access
 
 ```bash
 ip -4 addr show eth0
@@ -522,7 +528,7 @@ The recovered output shows:
 
 The established filename is retained. This screenshot supports address, routing and connectivity validation; it does not display the router reservation itself.
 
-## 5. Use Ethernet for the DNS server
+#### 5. Use Ethernet for the DNS server
 
 Later in the project, I disabled Wi-Fi so the server used its wired connection:
 
@@ -542,11 +548,11 @@ ping -c 4 google.com
 
 The domain resolved to an IPv4 address and all four ping requests received replies, with 0% packet loss.
 
-## Outcome
+#### Outcome
 
 The recovered evidence shows the Orbi reservation for 172.16.0.57, successful SSH access at that address after reboot, Ethernet interface and routing validation, and later Ethernet-only operation with successful domain-name connectivity. The earlier routing screenshot still shows Wi-Fi active; the later validation confirms it was disabled.
 
-## Screenshot inventory and evidence status
+#### Screenshot inventory and evidence status
 
 | Filename | Evidence |
 | --- | --- |
@@ -559,13 +565,13 @@ The recovered evidence shows the Orbi reservation for 172.16.0.57, successful SS
 Both previously listed Phase 3 screenshot gaps have been filled by recovered uploads. No screenshots were fabricated. The uploaded Ethernet-only image originally used number 02; its published filename is number 05 to preserve the original ZIP's existing 02 reboot image and prevent collisions. Unredacted originals and the redundant connected-device list are not included.
 
 
-# Phase 4 — AdGuard Home Installation and Configuration
+### Phase 4 — AdGuard Home Installation and Configuration
 
-## Objective
+#### Objective
 
 Deploy AdGuard Home on the Raspberry Pi, bind its services to Ethernet, and verify DNS resolution and controlled filtering.
 
-## Lab settings
+#### Lab settings
 
 | Setting | Value |
 | --- | --- |
@@ -580,7 +586,7 @@ Deploy AdGuard Home on the Raspberry Pi, bind its services to Ethernet, and veri
 
 This document records the existing lab. Commands below describe validation steps; they are not newly executed test results.
 
-## 1. Install AdGuard Home
+#### 1. Install AdGuard Home
 
 I used the AdGuard Home installation script for the Raspberry Pi's ARM64 environment. The project conversation records installation in /opt/AdGuardHome, automatic service startup and the initial setup address http://172.16.0.57:3000.
 
@@ -588,7 +594,7 @@ The recovered installer output confirms successful installation, that the servic
 
 ![AdGuard Home installation](screenshots/phase-4-01-adguard-installation.png)
 
-## 2. Configure web and DNS interfaces
+#### 2. Configure web and DNS interfaces
 
 In the setup wizard, I selected the Ethernet interface for both services:
 
@@ -603,7 +609,7 @@ This screenshot shows the wizard settings before completion. The later socket ou
 
 An administrator account was configured during setup. Credentials are intentionally excluded; the account-creation screen was not recovered.
 
-## 3. Validate the running service and listening ports
+#### 3. Validate the running service and listening ports
 
 From the installation directory, the service status can be checked with:
 
@@ -629,7 +635,7 @@ The recovered terminal screenshot shows:
 
 During the original work, nslookup was initially unavailable; dnsutils was installed before the lookup tests. The screenshot above shows the later successful lookup, not the package-install step. Resolved website addresses are historical and can change.
 
-## 4. Confirm requests in the Query Log
+#### 4. Confirm requests in the Query Log
 
 I opened the AdGuard Home Query Log to verify that the server recorded the test requests. The recovered image shows example.com A and AAAA requests marked Processed, with the client identified as DNS-SERVER at 172.16.0.57.
 
@@ -637,7 +643,7 @@ I opened the AdGuard Home Query Log to verify that the server recorded the test 
 
 These requests came from the Pi itself. This proves local direct-query processing; it does not establish that every household device was using AdGuard Home.
 
-## 5. Validate filtering with a controlled test
+#### 5. Validate filtering with a controlled test
 
 I used example.org for a controlled blocking test. The recovered Query Log shows its A and AAAA requests marked Blocked by Custom filtering rules, alongside processed example.com requests.
 
@@ -645,7 +651,7 @@ I used example.org for a controlled blocking test. The recovered Query Log shows
 
 This demonstrates the custom rule was applied to the test domain. It is not evidence that example.org is malicious, or a benchmark of general ad blocking. The exact custom-rule text and the corresponding terminal blocked response were not recovered in this image set.
 
-## 6. Additional service-health validation
+#### 6. Additional service-health validation
 
 A later validation screenshot shows AdGuard Home running, DNS listening on UDP/TCP 172.16.0.57:53, and the web interface listening on TCP 172.16.0.57:80. A direct example.com lookup succeeds, eth0 is connected, and wlan0 is unavailable.
 
@@ -653,28 +659,28 @@ A later validation screenshot shows AdGuard Home running, DNS listening on UDP/T
 
 The original filename is retained for consistency. This image does not show a reboot sequence or uptime, so it confirms service health but does not independently prove persistence across reboot. The installer message confirms automatic startup was configured; it does not by itself verify a successful restart after reboot.
 
-## Outcome
+#### Outcome
 
 The six recovered screenshots document successful installation, Ethernet-bound web and DNS settings, a running AdGuard Home service, UDP/TCP DNS listeners, successful direct DNS resolution, query logging, controlled filtering and a later service-health check.
 
 The test queries shown came from the Pi itself. They do not establish that every household device was using AdGuard Home; client configuration and testing are documented separately.
 
-## Evidence limitations
+#### Evidence limitations
 
 All six screenshot files are available. The reboot and reconnect sequence itself is not shown, so reboot persistence remains unverified by these images alone. Administrator-account creation, the dnsutils package installation and the exact custom-filter rule text are not pictured. No images or command output were fabricated to fill these gaps.
 
 Usernames are redacted in the published terminal images. The installer image retains its existing redaction. Private LAN addresses, generic hostnames and public test domains remain visible to explain the lab.
 ---
 
-# Phase 5 — Network-Wide DNS Integration
+### Phase 5 — Network-Wide DNS Integration
 
-## Objective
+#### Objective
 
 Extend AdGuard Home beyond DNS requests made on the Raspberry Pi itself. In this phase, I configured a Windows PC to use the Raspberry Pi directly and configured the NETGEAR Orbi router to forward DNS requests to AdGuard Home. I then used the AdGuard Home Query Log to examine which clients reached the server and which requests were filtered.
 
 The DNS server was `172.16.0.57` (TCP/UDP port 53), the Orbi gateway was `172.16.0.1`, and the Windows PC was `172.16.0.74` on the `172.16.0.0/24` private LAN.
 
-## 1. Verify DNS connectivity from Windows
+#### 1. Verify DNS connectivity from Windows
 
 Before changing the client DNS settings, I checked whether Windows could reach the DNS server over TCP port 53:
 
@@ -684,7 +690,7 @@ Test-NetConnection 172.16.0.57 -Port 53
 
 The original lab recorded `TcpTestSucceeded : True`. This verifies a TCP connection to port 53, not DNS resolution over UDP. **The four recovered Phase 5 screenshots do not show this PowerShell output**, so I have not assigned a Query Log image to this step.
 
-## 2. Configure Windows to use AdGuard Home
+#### 2. Configure Windows to use AdGuard Home
 
 On the Windows PC, I opened **Settings → Network & Internet → Ethernet → DNS Server Assignment → Edit**, selected manual IPv4 configuration, set the preferred DNS server to `172.16.0.57`, left the alternate DNS server blank, and disabled DNS over HTTPS for this connection.
 
@@ -701,7 +707,7 @@ The original lab recorded that the Windows client used `172.16.0.57` for the loo
 
 *Figure 1 — AdGuard Home processed `example.com` A/AAAA requests attributed to Windows client `172.16.0.74`. This demonstrates client DNS activity, not the PowerShell connectivity test.*
 
-## 3. Confirm DNS filtering on the Windows client
+#### 3. Confirm DNS filtering on the Windows client
 
 I inspected the AdGuard Home Query Log after the Windows DNS change. It recorded both permitted requests and requests blocked by AdGuard's DNS filter for `172.16.0.74`.
 
@@ -711,7 +717,7 @@ I inspected the AdGuard Home Query Log after the Windows DNS change. It recorded
 
 These log entries demonstrate filtering decisions for the recorded requests. They do not prove that every application on Windows always uses the system DNS settings.
 
-## 4. Configure NETGEAR Orbi DNS forwarding
+#### 4. Configure NETGEAR Orbi DNS forwarding
 
 The router's LAN DHCP settings did not expose the custom DNS distribution option needed for this setup. I instead configured the router's **Internet Setup** DNS setting to use `172.16.0.57`.
 
@@ -730,7 +736,7 @@ AdGuard Home (172.16.0.57:53)
 Quad9 upstream resolver (at this stage)
 ```
 
-## 5. Verify router-forwarded household DNS traffic
+#### 5. Verify router-forwarded household DNS traffic
 
 The AdGuard Home Query Log recorded processed and blocked requests attributed to `172.16.0.1`, the Orbi router. The domains included requests associated with multiple services, such as Apple and TikTok.
 
@@ -744,13 +750,13 @@ The AdGuard Home Query Log recorded processed and blocked requests attributed to
 
 **Client attribution limitation:** When the Orbi forwards DNS on behalf of household devices, AdGuard Home often records the router IP rather than the original device IP. The Windows PC, which was configured directly, appeared as `172.16.0.74`. Therefore, the router-proxied logs demonstrate DNS activity through the router, but they do not reliably identify each individual household device.
 
-## Challenges and solutions
+#### Challenges and solutions
 
 - **Client adoption:** A working DNS server does not mean clients use it automatically. I set the Windows preferred DNS address to the Raspberry Pi and verified client activity in the Query Log.
 - **Router configuration:** Because the desired custom DNS setting was unavailable in Orbi's LAN DHCP options, I used the router's Internet Setup DNS configuration.
 - **Client identification:** Orbi DNS proxying grouped many requests under `172.16.0.1`. Directly configuring a client, as with Windows, allowed AdGuard Home to identify that client separately.
 
-## Outcome
+#### Outcome
 
 The recorded lab tests and recovered Query Logs support these Phase 5 results:
 
@@ -760,7 +766,7 @@ The recorded lab tests and recovered Query Logs support these Phase 5 results:
 - AdGuard Home processed and blocked selected router-forwarded requests.
 - Router DNS proxying limited per-device attribution, which informed the client-specific filtering work in Phase 6.
 
-## Evidence limitations
+#### Evidence limitations
 
 The four recovered images are all AdGuard Home Query Logs. They do **not** display `Test-NetConnection`, `Get-DnsClientServerAddress`, `nslookup`, router DNS settings, or a reboot/reconnect sequence. The commands and configuration steps above are retained from the original project record, but the screenshots must not be captioned as proof of those separate actions. Reboot persistence is not established by this Phase 5 image set.
 
@@ -772,9 +778,9 @@ The images contain private LAN IP addresses, a Windows hostname, router-associat
 
 ---
 
-# Phase 6 — Client-Specific DNS Filtering & Family Protection
+### Phase 6 — Client-Specific DNS Filtering & Family Protection
 
-## Objective
+#### Objective
 
 The objective of this phase was to configure client-specific DNS security policies using AdGuard Home and validate that different devices could receive different filtering behavior.
 
@@ -788,7 +794,7 @@ I then validated the policies using controlled DNS queries and AdGuard Home's Qu
 
 ---
 
-## Step 1 — Configure a Persistent Windows Client
+#### Step 1 — Configure a Persistent Windows Client
 
 I opened the AdGuard Home administration interface and navigated to:
 
@@ -814,7 +820,7 @@ The client overview also displayed its accumulated DNS request count, confirming
 
 ---
 
-## Step 2 — Configure Client-Specific Security Settings
+#### Step 2 — Configure Client-Specific Security Settings
 
 I opened the Windows-PC client configuration and reviewed the available protection settings.
 
@@ -847,7 +853,7 @@ The client continued using the global blocked-service configuration and global u
 
 ---
 
-## Step 3 — Validate Client-Specific DNS Filtering
+#### Step 3 — Validate Client-Specific DNS Filtering
 
 To verify that custom filtering policies could affect the Windows PC independently, I tested DNS queries for:
 
@@ -878,7 +884,7 @@ This demonstrated that AdGuard Home could apply different DNS filtering outcomes
 
 ---
 
-## Step 4 — Validate Safe Search Enforcement
+#### Step 4 — Validate Safe Search Enforcement
 
 Next, I tested AdGuard Home's Safe Search handling using Google DNS requests.
 
@@ -907,7 +913,7 @@ This provided evidence that AdGuard Home was applying Safe Search DNS handling t
 
 ---
 
-## Step 5 — Validate Client-Specific Service Blocking
+#### Step 5 — Validate Client-Specific Service Blocking
 
 To test application and service blocking, I reviewed DNS requests associated with Amazon.
 
@@ -940,9 +946,9 @@ However, because the two clients requested different Amazon-related domains, the
 
 ---
 
-## Challenges & Solutions
+#### Challenges & Solutions
 
-### Challenge 1 — Router DNS Proxy Limited Individual Client Identification
+##### Challenge 1 — Router DNS Proxy Limited Individual Client Identification
 
 **Problem:**
 
@@ -956,7 +962,7 @@ I configured the Windows PC to communicate directly with AdGuard Home and regist
 
 This allowed custom policies to be associated with that client.
 
-### Challenge 2 — Applying Different DNS Policies to Different Clients
+##### Challenge 2 — Applying Different DNS Policies to Different Clients
 
 **Problem:**
 
@@ -970,7 +976,7 @@ I then compared Query Log responses from Windows-PC and the Orbi router.
 
 The results showed different filtering outcomes for `example.org` and Google Safe Search requests.
 
-### Challenge 3 — Verifying Filtering Without Relying Only on Configuration Screenshots
+##### Challenge 3 — Verifying Filtering Without Relying Only on Configuration Screenshots
 
 **Problem:**
 
@@ -991,7 +997,7 @@ This provided evidence of both configured security policies and observed DNS beh
 
 ---
 
-## Phase 6 Results
+#### Phase 6 Results
 
 By the end of Phase 6, I had successfully:
 
@@ -1006,7 +1012,7 @@ By the end of Phase 6, I had successfully:
 - Compared direct-client and router-forwarded DNS behavior.
 - Documented the limitations introduced by the Orbi DNS proxy.
 
-### Evidence Summary
+##### Evidence Summary
 
 | Screenshot | Verified Evidence |
 |---|---|
@@ -1016,7 +1022,7 @@ By the end of Phase 6, I had successfully:
 | 04 | Safe Search DNS handling |
 | 05 | Amazon service blocking |
 
-### Evidence Limitations
+##### Evidence Limitations
 
 The screenshots demonstrate AdGuard Home configuration and recorded DNS filtering behavior.
 
@@ -1030,9 +1036,9 @@ The Orbi DNS proxy continued to limit individual identification of devices whose
 
 ---
 
-# Phase 7 — Unbound Recursive DNS & DNSSEC
+### Phase 7 — Unbound Recursive DNS & DNSSEC
 
-## Objective
+#### Objective
 
 In this phase, I verified a local Unbound DNS resolver on my Raspberry Pi, checked its integration with AdGuard Home, and tested DNSSEC validation.
 
@@ -1057,7 +1063,7 @@ They do not independently establish whether Unbound uses full recursion rather t
 
 ---
 
-## Step 1 — Verify Unbound Service Health
+#### Step 1 — Verify Unbound Service Health
 
 I connected to the Raspberry Pi using SSH key authentication and checked the service:
 
@@ -1079,7 +1085,7 @@ An enabled service is configured to start at boot, but this screenshot alone doe
 
 ---
 
-## Step 2 — Verify the Local DNS Listener
+#### Step 2 — Verify the Local DNS Listener
 
 I checked which interfaces and ports Unbound was listening on:
 
@@ -1099,7 +1105,7 @@ This local-only listener separates Unbound from AdGuard Home's client-facing por
 
 ---
 
-## Step 3 — Validate the Unbound Configuration
+#### Step 3 — Validate the Unbound Configuration
 
 I ran:
 
@@ -1121,7 +1127,7 @@ This confirms the configuration passed Unbound's validation check; it does not b
 
 ---
 
-## Step 4 — Test Direct DNS Resolution
+#### Step 4 — Test Direct DNS Resolution
 
 To test Unbound independently of AdGuard Home, I queried the local resolver:
 
@@ -1148,7 +1154,7 @@ The successful response demonstrates that Unbound answered an IPv4 DNS lookup on
 
 ---
 
-## Step 5 — Verify AdGuard Home Upstream Configuration
+#### Step 5 — Verify AdGuard Home Upstream Configuration
 
 In **AdGuard Home → Settings → DNS settings**, I inspected the **Upstream DNS servers** field.
 
@@ -1170,7 +1176,7 @@ A configuration screenshot alone does not trace the network path of individual D
 
 ---
 
-## Step 6 — Validate DNSSEC Behavior
+#### Step 6 — Validate DNSSEC Behavior
 
 I tested a correctly signed domain and a deliberately broken DNSSEC domain directly against Unbound:
 
@@ -1196,7 +1202,7 @@ The positive response did not visibly contain the `ad` flag, so the conclusion r
 
 ---
 
-## Step 7 — Validate DNS Resolution Through AdGuard Home
+#### Step 7 — Validate DNS Resolution Through AdGuard Home
 
 Finally, I sent a DNS query to AdGuard Home's LAN-facing DNS service:
 
@@ -1227,15 +1233,15 @@ Combined with the upstream setting and direct Unbound tests, this supports the i
 
 ---
 
-## Challenges & Solutions
+#### Challenges & Solutions
 
-### Separating AdGuard Home and Unbound on the Same Raspberry Pi
+##### Separating AdGuard Home and Unbound on the Same Raspberry Pi
 
 **Challenge:** Both services perform DNS-related work, so their listening ports must not conflict.
 
 **Implementation verified:** AdGuard Home served client DNS on port 53, while Unbound listened locally on port 5335.
 
-### Proving DNSSEC Rather Than Assuming It from Successful Resolution
+##### Proving DNSSEC Rather Than Assuming It from Successful Resolution
 
 **Challenge:** A successful DNS lookup alone does not establish DNSSEC validation.
 
@@ -1243,7 +1249,7 @@ Combined with the upstream setting and direct Unbound tests, this supports the i
 
 The expected `NOERROR` and `SERVFAIL` responses were observed.
 
-### Avoiding Overstatement of Recursive DNS Operation
+##### Avoiding Overstatement of Recursive DNS Operation
 
 **Limitation:** The collected evidence confirms Unbound's operation and AdGuard Home's upstream setting, but does not include the Unbound configuration directives or a trace proving whether Unbound performs full recursion instead of forwarding.
 
@@ -1251,7 +1257,7 @@ The expected `NOERROR` and `SERVFAIL` responses were observed.
 
 ---
 
-## Phase 7 Results
+#### Phase 7 Results
 
 - Verified that Unbound 1.26.2 was enabled and running.
 - Confirmed local UDP and TCP listeners on `127.0.0.1:5335`.
@@ -1262,7 +1268,7 @@ The expected `NOERROR` and `SERVFAIL` responses were observed.
 - Resolved `example.com` through AdGuard Home at `172.16.0.57:53`.
 - Collected seven original screenshots documenting the validation sequence.
 
-### Evidence Limitations
+##### Evidence Limitations
 
 These screenshots do not independently prove reboot persistence, full iterative recursion rather than forwarding, or the precise upstream path of each DNS query.
 
@@ -1274,9 +1280,9 @@ No additional configuration files or packet traces were collected as part of thi
 
 ---
 
-# Phase 8 — SSH Hardening & System Security
+### Phase 8 — SSH Hardening & System Security
 
-## Objective
+#### Objective
 
 In this phase, I validated the Raspberry Pi DNS server's remote-access controls, host firewall, automatic update configuration, and essential service health. The goal was to reduce unnecessary access while keeping SSH administration, AdGuard Home DNS filtering, and Unbound DNS resolution operational.
 
@@ -1284,7 +1290,7 @@ This section documents **observed lab results**, not assumed settings. All scree
 
 ---
 
-## Step 1 — Validate SSH Server Hardening
+#### Step 1 — Validate SSH Server Hardening
 
 After successfully connecting to the Raspberry Pi with an existing Ed25519 SSH key, I inspected the effective SSH daemon settings:
 
@@ -1318,7 +1324,7 @@ An earlier SSH attempt without explicitly selecting the custom key returned `Per
 
 ---
 
-## Step 2 — Inspect UFW Firewall Rules
+#### Step 2 — Inspect UFW Firewall Rules
 
 I checked the active firewall configuration:
 
@@ -1353,7 +1359,7 @@ The default-deny incoming policy reduces exposure by allowing only explicitly pe
 
 ---
 
-## Step 3 — Verify the Unattended-Upgrades Service
+#### Step 3 — Verify the Unattended-Upgrades Service
 
 I inspected the service:
 
@@ -1371,7 +1377,7 @@ This service status alone does not establish that automatic package installation
 
 ---
 
-## Step 4 — Verify Automatic Update Scheduling
+#### Step 4 — Verify Automatic Update Scheduling
 
 I inspected the APT periodic configuration:
 
@@ -1394,7 +1400,7 @@ These directives configure periodic package-list updates and unattended upgrades
 
 ---
 
-## Step 5 — Review Automatic Upgrade History
+#### Step 5 — Review Automatic Upgrade History
 
 I checked the unattended-upgrades log:
 
@@ -1420,7 +1426,7 @@ The log also reported that battery-status checks were skipped because `powermgmt
 
 ---
 
-## Step 6 — Confirm Essential Services Remain Active
+#### Step 6 — Confirm Essential Services Remain Active
 
 Finally, I verified the status of the three services required for remote administration and DNS operation:
 
@@ -1450,21 +1456,21 @@ This confirms service activity at the time of testing. It is not a substitute fo
 
 ---
 
-## Challenges & Solutions
+#### Challenges & Solutions
 
-### Securing SSH without losing administrative access
+##### Securing SSH without losing administrative access
 
 **Challenge:** Disabling SSH password authentication can prevent remote access if the correct key is unavailable.
 
 **Approach:** I used an existing Ed25519 key to establish access and then verified the effective SSH restrictions. The working SSH session was preserved while checking settings.
 
-### Restricting access while maintaining DNS availability
+##### Restricting access while maintaining DNS availability
 
 **Challenge:** A default-deny firewall must still permit necessary DNS and administrative traffic.
 
 **Approach:** The observed UFW rules allowed DNS over TCP and UDP, AdGuard Home's web interface, and SSH from the local subnet. A final service-status check confirmed the core daemons remained active.
 
-### Distinguishing update configuration from actual update execution
+##### Distinguishing update configuration from actual update execution
 
 **Challenge:** A running unattended-upgrades service does not independently prove updates are being installed.
 
@@ -1472,7 +1478,7 @@ This confirms service activity at the time of testing. It is not a substitute fo
 
 ---
 
-## Phase 8 Results
+#### Phase 8 Results
 
 - Verified SSH public-key authentication was enabled and SSH password, keyboard-interactive, and root login were disabled.
 - Confirmed UFW was active with default-deny incoming traffic and LAN-restricted access to SSH, DNS, and the AdGuard Home web interface.
@@ -1482,7 +1488,7 @@ This confirms service activity at the time of testing. It is not a substitute fo
 - Confirmed `ssh`, `unbound`, and `AdGuardHome` all reported `active`.
 - Captured six original screenshots for the GitHub portfolio.
 
-### Evidence Limitations
+##### Evidence Limitations
 
 The captured evidence does not establish router-side WAN exposure, packet-level enforcement of each firewall rule, reboot persistence of all services, or the security state of other devices on the LAN. The effective `sshd -T` output represents the default evaluated configuration; connection-specific `Match` directives were not separately tested.
 
@@ -1492,9 +1498,9 @@ The captured evidence does not establish router-side WAN exposure, packet-level 
 
 ---
 
-# Phase 9 — DNS Security Testing & Validation
+### Phase 9 — DNS Security Testing & Validation
 
-## Objective
+#### Objective
 
 In this phase, I performed a series of DNS security and functionality tests to validate my Raspberry Pi DNS server after configuring AdGuard Home, integrating Unbound, enabling DNSSEC validation, and hardening the system.
 
@@ -1502,7 +1508,7 @@ The objective was to confirm that the DNS server could successfully resolve legi
 
 All tests were performed using my actual lab environment, with screenshots documenting the observed results.
 
-### Lab Environment
+##### Lab Environment
 
 | Component | Configuration |
 |---|---|
@@ -1519,7 +1525,7 @@ All tests were performed using my actual lab environment, with screenshots docum
 
 ---
 
-## Step 1 — Verify DNS Resolution from Windows
+#### Step 1 — Verify DNS Resolution from Windows
 
 The first test was designed to confirm that my Windows PC could communicate with the Raspberry Pi DNS server and successfully resolve a legitimate domain.
 
@@ -1529,7 +1535,7 @@ I opened Windows PowerShell and executed:
 nslookup example.com 172.16.0.57
 ```
 
-### Observed Results
+##### Observed Results
 
 ```text
 Server:  DNS-SERVER
@@ -1555,7 +1561,7 @@ Because the server address was explicitly specified, this test did not establish
 
 ---
 
-## Step 2 — Validate DNS Filtering
+#### Step 2 — Validate DNS Filtering
 
 Next, I tested whether AdGuard Home could block a domain associated with advertising services.
 
@@ -1565,7 +1571,7 @@ From Windows PowerShell, I executed:
 nslookup doubleclick.net 172.16.0.57
 ```
 
-### Observed Results
+##### Observed Results
 
 ```text
 Server:  DNS-SERVER
@@ -1584,7 +1590,7 @@ Instead of returning the domain's normal public IP addresses, the DNS server ret
 
 These responses are consistent with AdGuard Home's DNS blocking behavior.
 
-### Result
+##### Result
 
 The test confirmed that the DNS filtering configuration successfully blocked the tested advertising-related domain.
 
@@ -1594,7 +1600,7 @@ The test confirmed that the DNS filtering configuration successfully blocked the
 
 ---
 
-## Step 3 — Validate DNSSEC Enforcement
+#### Step 3 — Validate DNSSEC Enforcement
 
 DNSSEC (Domain Name System Security Extensions) helps protect DNS integrity by allowing validating resolvers to detect improperly signed or tampered DNS data.
 
@@ -1606,7 +1612,7 @@ I executed:
 nslookup dnssec-failed.org 172.16.0.57
 ```
 
-### Observed Results
+##### Observed Results
 
 ```text
 Server:  DNS-SERVER
@@ -1619,7 +1625,7 @@ The query returned a server failure rather than a normal DNS answer.
 
 The domain `dnssec-failed.org` is designed to fail DNSSEC validation.
 
-### Result
+##### Result
 
 This result was consistent with successful DNSSEC enforcement. Combined with the direct Unbound DNSSEC tests performed in Phase 7, it provided supporting evidence that invalid DNSSEC responses were being rejected through the configured DNS setup.
 
@@ -1631,7 +1637,7 @@ The failure response alone does not identify the internal cause of every possibl
 
 ---
 
-## Step 4 — Test AdGuard Home Service Recovery
+#### Step 4 — Test AdGuard Home Service Recovery
 
 To evaluate service recovery, I performed a controlled restart of AdGuard Home and verified that it returned to an operational state.
 
@@ -1647,7 +1653,7 @@ After the restart, I checked the service state:
 sudo systemctl is-active AdGuardHome
 ```
 
-### Observed Result
+##### Observed Result
 
 ```text
 active
@@ -1668,7 +1674,7 @@ Active: active (running)
 
 The startup logs also confirmed that AdGuard Home initialized its network listeners.
 
-### Verified Network Listeners
+##### Verified Network Listeners
 
 | Service | Address | Port |
 |---|---|---|
@@ -1678,7 +1684,7 @@ The startup logs also confirmed that AdGuard Home initialized its network listen
 
 The service was also marked as enabled in systemd.
 
-### Result
+##### Result
 
 AdGuard Home successfully restarted, returned to an active state, and initialized its DNS and web interface listeners.
 
@@ -1690,13 +1696,13 @@ No startup errors were visible in the captured status output.
 
 ---
 
-## Step 5 — Verify DNS Resolution and Filtering After Restart
+#### Step 5 — Verify DNS Resolution and Filtering After Restart
 
 Although the service reported that it was running, I wanted to verify that it could still perform its primary functions from a separate network client.
 
 I returned to Windows PowerShell and performed two additional tests.
 
-### Test A — Normal DNS Resolution
+##### Test A — Normal DNS Resolution
 
 ```powershell
 nslookup example.com 172.16.0.57
@@ -1718,7 +1724,7 @@ Addresses: 2606:4700:10::6814:179a
 
 The DNS server successfully resolved the legitimate domain after restarting.
 
-### Test B — DNS Filtering
+##### Test B — DNS Filtering
 
 ```powershell
 nslookup doubleclick.net 172.16.0.57
@@ -1738,7 +1744,7 @@ Addresses: ::
 
 The DNS server continued returning blocking responses for the advertising-related domain.
 
-### Result
+##### Result
 
 Both tests passed.
 
@@ -1750,7 +1756,7 @@ The results demonstrated that AdGuard Home recovered its DNS resolution and filt
 
 ---
 
-## Step 6 — Verify Windows DNS Client Configuration
+#### Step 6 — Verify Windows DNS Client Configuration
 
 Earlier tests explicitly directed DNS queries to the Raspberry Pi. I next verified that my Windows Ethernet adapter was actually configured to use the Raspberry Pi as its DNS server.
 
@@ -1760,7 +1766,7 @@ From Windows PowerShell, I executed:
 Get-DnsClientServerAddress -AddressFamily IPv4
 ```
 
-### Observed Results
+##### Observed Results
 
 ```text
 InterfaceAlias             InterfaceIndex AddressFamily ServerAddresses
@@ -1769,7 +1775,7 @@ Ethernet                   9              IPv4          {172.16.0.57}
 Loopback Pseudo-Interface 1 1             IPv4          {}
 ```
 
-### Configuration Findings
+##### Configuration Findings
 
 | Setting | Observed value |
 |---|---|
@@ -1789,7 +1795,7 @@ The test did not separately inspect IPv6 DNS settings or all possible applicatio
 
 ---
 
-## Step 7 — Validate Default DNS Resolution
+#### Step 7 — Validate Default DNS Resolution
 
 For the final client-side test, I verified that Windows could automatically select the Raspberry Pi DNS server without manually specifying its address.
 
@@ -1801,7 +1807,7 @@ nslookup example.com
 
 Unlike previous queries, this command did not include a DNS server IP address.
 
-### Observed Results
+##### Observed Results
 
 ```text
 Server:  DNS-SERVER
@@ -1815,7 +1821,7 @@ Addresses: 2606:4700:10::6814:179a
            104.20.23.154
 ```
 
-### Result
+##### Result
 
 Windows automatically selected `DNS-SERVER` at `172.16.0.57` and successfully resolved the domain.
 
@@ -1827,27 +1833,27 @@ This demonstrated that ordinary Windows `nslookup` queries could use the Raspber
 
 ---
 
-## Challenges & Solutions
+#### Challenges & Solutions
 
-### Challenge 1 — Distinguishing DNS Reachability from Default DNS Configuration
+##### Challenge 1 — Distinguishing DNS Reachability from Default DNS Configuration
 
 **Challenge:** A successful query directed to a specific DNS server does not prove that the client normally uses that server.
 
 **Solution:** I inspected the Windows Ethernet adapter's DNS configuration and then performed a lookup without specifying a DNS server. Both tests confirmed that the Raspberry Pi was selected for normal Windows nslookup requests.
 
-### Challenge 2 — Confirming Filtering Rather Than Basic DNS Resolution
+##### Challenge 2 — Confirming Filtering Rather Than Basic DNS Resolution
 
 **Challenge:** Successful DNS resolution alone does not demonstrate that AdGuard Home is blocking unwanted domains.
 
 **Solution:** I tested an advertising-related domain and verified that the server returned null IPv4 and IPv6 addresses instead of normal public addresses.
 
-### Challenge 3 — Verifying Service Functionality After Restart
+##### Challenge 3 — Verifying Service Functionality After Restart
 
 **Challenge:** A service can report an active state even if its application-level functionality is not operating correctly.
 
 **Solution:** After restarting AdGuard Home, I performed additional DNS resolution and filtering tests from Windows to confirm that both functions remained operational.
 
-### Challenge 4 — Interpreting DNSSEC Failure Responses
+##### Challenge 4 — Interpreting DNSSEC Failure Responses
 
 **Challenge:** A DNS server failure can have multiple causes, so a single failed lookup is not sufficient to prove the complete DNSSEC validation process.
 
@@ -1855,7 +1861,7 @@ This demonstrated that ordinary Windows `nslookup` queries could use the Raspber
 
 ---
 
-## Phase 9 Results
+#### Phase 9 Results
 
 | Validation | Observed result | Status |
 |---|---|---|
@@ -1867,7 +1873,7 @@ This demonstrated that ordinary Windows `nslookup` queries could use the Raspber
 | Windows IPv4 DNS configuration | Ethernet configured with 172.16.0.57 | PASS |
 | Default Windows DNS resolution | Raspberry Pi automatically selected | PASS |
 
-### Key Accomplishments
+##### Key Accomplishments
 
 - Validated DNS communication between Windows and the Raspberry Pi.
 - Demonstrated DNS filtering using a known advertising-related domain.
@@ -1880,7 +1886,7 @@ This demonstrated that ordinary Windows `nslookup` queries could use the Raspber
 
 ---
 
-## Evidence Limitations
+#### Evidence Limitations
 
 These tests validate specific observed behaviors within the home lab environment.
 
@@ -1898,7 +1904,7 @@ The controlled restart and subsequent queries demonstrate successful recovery fr
 
 ---
 
-## Phase 9 Conclusion
+#### Phase 9 Conclusion
 
 Phase 9 successfully validated the DNS server's primary functionality and several important security behaviors.
 
@@ -1914,9 +1920,9 @@ Together with the previous installation, networking, DNSSEC, and system-hardenin
 
 ---
 
-# Phase 10 — Monitoring, Logging & Performance Metrics
+### Phase 10 — Monitoring, Logging & Performance Metrics
 
-## Objective
+#### Objective
 
 In this phase, I monitored and evaluated the performance, reliability, and operational health of my Raspberry Pi DNS security server.
 
@@ -1934,7 +1940,7 @@ The primary objectives were to:
 
 All results documented in this phase were collected from my actual lab environment.
 
-### Lab Environment
+##### Lab Environment
 
 | Component | Configuration |
 |---|---|
@@ -1952,7 +1958,7 @@ All results documented in this phase were collected from my actual lab environme
 
 ---
 
-## Step 1 — Monitor AdGuard Home Dashboard Statistics
+#### Step 1 — Monitor AdGuard Home Dashboard Statistics
 
 I accessed the AdGuard Home dashboard from my Windows PC using:
 
@@ -1962,7 +1968,7 @@ http://172.16.0.57
 
 The dashboard provided visibility into DNS requests, filtering activity, client statistics, and upstream resolver performance.
 
-### Observed DNS Statistics
+##### Observed DNS Statistics
 
 The dashboard displayed the following metrics for the last 24 hours:
 
@@ -1982,7 +1988,7 @@ The dashboard showed that approximately one-quarter of recorded DNS requests wer
 
 The zero malware/phishing count represents the dashboard's recorded value and does not establish that no malicious DNS activity occurred.
 
-### Top DNS Clients
+##### Top DNS Clients
 
 | Client | DNS requests | Percentage |
 |---|---:|---:|
@@ -1994,7 +2000,7 @@ The router accounted for most recorded DNS requests.
 
 This was consistent with the possibility that the router was forwarding DNS requests on behalf of other devices, although the dashboard alone did not establish which devices originally generated those requests.
 
-### Upstream DNS Statistics
+##### Upstream DNS Statistics
 
 | Upstream DNS server | Requests | Percentage | Average response time |
 |---|---:|---:|---:|
@@ -2013,7 +2019,7 @@ These dashboard measurements were historical observations, not controlled perfor
 
 ---
 
-## Step 2 — Analyze DNS Query Logs
+#### Step 2 — Analyze DNS Query Logs
 
 I opened the AdGuard Home Query Log to investigate individual DNS requests and identify how the server processed them.
 
@@ -2026,7 +2032,7 @@ The Query Log displayed:
 - Client information.
 - Processing times for completed requests.
 
-### Observed Query Log Entries
+##### Observed Query Log Entries
 
 | Domain | Result | Processing time |
 |---|---|---|
@@ -2043,7 +2049,7 @@ Blocked requests were identified as matching AdGuard DNS filtering rules, while 
 
 The visible requests were associated with the router at `172.16.0.1`, identified as `RBE971`.
 
-### Result
+##### Result
 
 Query logging was operational and provided useful information for DNS troubleshooting, filtering verification, and performance analysis.
 
@@ -2053,7 +2059,7 @@ Query logging was operational and provided useful information for DNS troublesho
 
 ---
 
-## Step 3 — Verify Primary Upstream DNS Configuration
+#### Step 3 — Verify Primary Upstream DNS Configuration
 
 The dashboard showed both Unbound and the router in its upstream statistics.
 
@@ -2063,7 +2069,7 @@ To investigate this, I opened:
 
 I inspected the configured primary upstream DNS servers.
 
-### Observed Configuration
+##### Observed Configuration
 
 ```text
 127.0.0.1:5335
@@ -2077,7 +2083,7 @@ The DNS server selection mode was set to:
 Load-balancing
 ```
 
-### Result
+##### Result
 
 The configuration confirmed that AdGuard Home was using the locally hosted Unbound resolver as its configured primary upstream.
 
@@ -2108,17 +2114,17 @@ Because only one primary upstream was listed, the load-balancing setting did not
 
 ---
 
-## Step 4 — Inspect Fallback, Bootstrap & Private Reverse DNS Settings
+#### Step 4 — Inspect Fallback, Bootstrap & Private Reverse DNS Settings
 
 I continued reviewing the DNS settings to determine why the router appeared in the upstream statistics.
 
-### Fallback DNS Configuration
+##### Fallback DNS Configuration
 
 The fallback DNS server field was empty.
 
 This confirmed that no explicit fallback DNS server was configured in the displayed field.
 
-### Bootstrap DNS Configuration
+##### Bootstrap DNS Configuration
 
 The bootstrap DNS field included Quad9 addresses, including:
 
@@ -2133,7 +2139,7 @@ Bootstrap DNS servers are used when hostname resolution is required for certain 
 
 Because the primary Unbound upstream was configured using a local IP address, hostname-based bootstrap resolution was not ordinarily required for that connection.
 
-### Private Reverse DNS Configuration
+##### Private Reverse DNS Configuration
 
 The interface identified the default private reverse DNS resolver as:
 
@@ -2150,7 +2156,7 @@ Private reverse DNS allows AdGuard Home to request local hostname information fr
 
 For example, this can help identify a client by hostname instead of displaying only its IP address.
 
-### Result
+##### Result
 
 The router's role as the default private reverse DNS resolver provided a plausible explanation for its appearance in the dashboard's upstream statistics.
 
@@ -2164,13 +2170,13 @@ No configuration changes were made during this inspection.
 
 ---
 
-## Step 5 — Benchmark DNS Response Times
+#### Step 5 — Benchmark DNS Response Times
 
 I performed a DNS performance test from Windows PowerShell to measure how quickly the Raspberry Pi responded to repeated DNS queries.
 
 The test consisted of ten sequential requests for the IPv4 address of `example.com`.
 
-### PowerShell Benchmark Command
+##### PowerShell Benchmark Command
 
 ```powershell
 1..10 | ForEach-Object {
@@ -2185,7 +2191,7 @@ The test consisted of ten sequential requests for the IPv4 address of `example.c
 }
 ```
 
-### Observed Benchmark Results
+##### Observed Benchmark Results
 
 | Test | Response time |
 |---|---:|
@@ -2200,7 +2206,7 @@ The test consisted of ten sequential requests for the IPv4 address of `example.c
 | 9 | 1.34 ms |
 | 10 | 1.32 ms |
 
-### Performance Summary
+##### Performance Summary
 
 | Metric | Result |
 |---|---:|
@@ -2220,7 +2226,7 @@ The PowerShell timings also included command execution overhead, so they represe
 
 The AdGuard Home dashboard's 77 ms average processing time was a separate metric and was not directly equivalent to these benchmark results.
 
-### Result
+##### Result
 
 All ten DNS lookups completed successfully, with substantially faster observed completion times after the initial request.
 
@@ -2230,11 +2236,11 @@ All ten DNS lookups completed successfully, with substantially faster observed c
 
 ---
 
-## Step 6 — Monitor Raspberry Pi System Resources
+#### Step 6 — Monitor Raspberry Pi System Resources
 
 I connected to the Raspberry Pi using SSH to evaluate system uptime, workload, memory consumption, storage capacity, and CPU temperature.
 
-### Check System Uptime
+##### Check System Uptime
 
 ```bash
 uptime
@@ -2250,7 +2256,7 @@ The Raspberry Pi had been running for over 17 days without a system reboot.
 
 The load averages indicated very low recent system workload.
 
-### Check Memory Usage
+##### Check Memory Usage
 
 ```bash
 free -h
@@ -2271,7 +2277,7 @@ The server had substantial available memory.
 
 Linux uses otherwise available memory for filesystem caching, so the available-memory figure is generally more informative than the free-memory figure alone.
 
-### Check Disk Usage
+##### Check Disk Usage
 
 ```bash
 df -h /
@@ -2286,7 +2292,7 @@ Filesystem      Size  Used Avail Use% Mounted on
 
 The root filesystem was using approximately 8% of its capacity, leaving approximately 52 GB available.
 
-### Check CPU Temperature
+##### Check CPU Temperature
 
 ```bash
 vcgencmd measure_temp
@@ -2302,7 +2308,7 @@ The CPU temperature was 51.1°C at the time of testing.
 
 This was below the Raspberry Pi 4's typical thermal-throttling threshold of approximately 80°C.
 
-### Resource Monitoring Summary
+##### Resource Monitoring Summary
 
 | Metric | Observed value |
 |---|---|
@@ -2315,7 +2321,7 @@ This was below the Raspberry Pi 4's typical thermal-throttling threshold of appr
 | Available disk space | 52 GB |
 | CPU temperature | 51.1°C |
 
-### Result
+##### Result
 
 The Raspberry Pi demonstrated low resource utilization, substantial memory and storage headroom, and no apparent thermal concern during the captured measurement.
 
@@ -2327,11 +2333,11 @@ These values represent a point-in-time snapshot and do not establish peak usage 
 
 ---
 
-## Step 7 — Verify Service Health & Inspect System Logs
+#### Step 7 — Verify Service Health & Inspect System Logs
 
 I checked the operational status of AdGuard Home, Unbound, and SSH.
 
-### Service Health Check
+##### Service Health Check
 
 ```bash
 sudo systemctl is-active AdGuardHome unbound ssh
@@ -2347,7 +2353,7 @@ active
 
 All three services were active.
 
-### Inspect Warning-Level System Logs
+##### Inspect Warning-Level System Logs
 
 I executed:
 
@@ -2365,7 +2371,7 @@ This indicated that the command found no matching warning-level or higher-priori
 
 However, this did not guarantee that the applications were completely free of operational errors.
 
-### Inspect Recent Service Events
+##### Inspect Recent Service Events
 
 I then executed:
 
@@ -2391,7 +2397,7 @@ r._dns-sd._udp.0.0.16.172.in-addr.arpa
 
 The logs showed that some requests to the router's DNS service were not receiving responses before the timeout.
 
-### Initial Assessment
+##### Initial Assessment
 
 The errors appeared related to local DNS discovery and reverse DNS operations rather than ordinary public-domain resolution through Unbound.
 
@@ -2403,11 +2409,11 @@ This prompted a series of targeted DNS diagnostics.
 
 ---
 
-## Step 8 — Test Standard Router Reverse DNS Resolution
+#### Step 8 — Test Standard Router Reverse DNS Resolution
 
 To determine whether the router's DNS service was generally unavailable, I tested standard PTR lookups directly from the Raspberry Pi.
 
-### Test A — Resolve the Windows PC Hostname
+##### Test A — Resolve the Windows PC Hostname
 
 ```bash
 dig @172.16.0.1 -x 172.16.0.74 +time=2 +tries=1
@@ -2427,7 +2433,7 @@ SERVER: 172.16.0.1#53
 
 The router successfully returned a hostname for the Windows PC.
 
-### Test B — Resolve the Router Hostname
+##### Test B — Resolve the Router Hostname
 
 ```bash
 dig @172.16.0.1 -x 172.16.0.1 +time=2 +tries=1
@@ -2447,7 +2453,7 @@ SERVER: 172.16.0.1#53
 
 The router successfully resolved its own address.
 
-### Results
+##### Results
 
 | Test | DNS status | Response time |
 |---|---|---:|
@@ -2456,7 +2462,7 @@ The router successfully resolved its own address.
 
 Both standard reverse DNS queries succeeded.
 
-### Interpretation
+##### Interpretation
 
 These results demonstrated that the router's DNS service was reachable and capable of answering ordinary PTR queries.
 
@@ -2468,17 +2474,17 @@ Therefore, the earlier timeout messages did not establish a complete failure of 
 
 ---
 
-## Step 9 — Reproduce the DNS Service Discovery Timeout over UDP
+#### Step 9 — Reproduce the DNS Service Discovery Timeout over UDP
 
 After confirming that standard reverse DNS queries worked, I tested the specific DNS Service Discovery query identified in the AdGuard Home logs.
 
-### UDP Diagnostic Command
+##### UDP Diagnostic Command
 
 ```bash
 dig @172.16.0.1 r._dns-sd._udp.0.0.16.172.in-addr.arpa PTR +time=2 +tries=1
 ```
 
-### Observed Result
+##### Observed Result
 
 ```text
 communications error to 172.16.0.1#53: timed out
@@ -2488,7 +2494,7 @@ no servers could be reached
 
 The router did not respond within the two-second timeout.
 
-### Interpretation
+##### Interpretation
 
 The result reproduced the timeout behavior seen in the AdGuard Home logs.
 
@@ -2504,17 +2510,17 @@ The test did not establish why the router failed to respond.
 
 ---
 
-## Step 10 — Repeat the DNS Service Discovery Test over TCP
+#### Step 10 — Repeat the DNS Service Discovery Test over TCP
 
 To determine whether the behavior was specific to UDP, I repeated the same query using TCP.
 
-### TCP Diagnostic Command
+##### TCP Diagnostic Command
 
 ```bash
 dig @172.16.0.1 r._dns-sd._udp.0.0.16.172.in-addr.arpa PTR +tcp +time=2 +tries=1
 ```
 
-### Observed Result
+##### Observed Result
 
 ```text
 communications error to 172.16.0.1#53: timed out
@@ -2524,7 +2530,7 @@ no servers could be reached
 
 The router again failed to respond within two seconds.
 
-### Diagnostic Comparison
+##### Diagnostic Comparison
 
 | DNS test | Protocol | Result |
 |---|---|---|
@@ -2533,7 +2539,7 @@ The router again failed to respond within two seconds.
 | DNS Service Discovery PTR | UDP | Timeout |
 | DNS Service Discovery PTR | TCP | Timeout |
 
-### Interpretation
+##### Interpretation
 
 The router successfully answered the two standard reverse DNS queries but did not answer the tested DNS Service Discovery query over either UDP or TCP within the configured timeout.
 
@@ -2549,9 +2555,9 @@ Because ordinary DNS resolution and filtering continued working, I documented th
 
 ---
 
-## Challenges & Solutions
+#### Challenges & Solutions
 
-### Challenge 1 — Understanding Unexpected Upstream DNS Statistics
+##### Challenge 1 — Understanding Unexpected Upstream DNS Statistics
 
 **Challenge:** The AdGuard Home dashboard showed the router as an upstream resolver even though Unbound was intended to handle upstream DNS resolution.
 
@@ -2559,7 +2565,7 @@ Because ordinary DNS resolution and filtering continued working, I documented th
 
 **Finding:** Unbound was the only configured primary upstream, while the router was listed as the default private reverse DNS resolver. This provided a plausible explanation for the router appearing in the dashboard statistics.
 
-### Challenge 2 — Interpreting DNS Performance Measurements
+##### Challenge 2 — Interpreting DNS Performance Measurements
 
 **Challenge:** The first DNS lookup took significantly longer than the following nine requests.
 
@@ -2567,7 +2573,7 @@ Because ordinary DNS resolution and filtering continued working, I documented th
 
 **Finding:** The results were consistent with DNS caching, but the benchmark also included PowerShell execution overhead. I documented the measurements as client-observed lookup times rather than pure DNS server latency.
 
-### Challenge 3 — Distinguishing Healthy Services from Application Errors
+##### Challenge 3 — Distinguishing Healthy Services from Application Errors
 
 **Challenge:** AdGuard Home, Unbound, and SSH all reported active states, but AdGuard Home logs contained repeated DNS timeout errors.
 
@@ -2575,7 +2581,7 @@ Because ordinary DNS resolution and filtering continued working, I documented th
 
 **Finding:** The errors involved requests to the router's DNS service, particularly local DNS Service Discovery-related queries.
 
-### Challenge 4 — Isolating Router DNS Timeout Behavior
+##### Challenge 4 — Isolating Router DNS Timeout Behavior
 
 **Challenge:** It was unclear whether the router's DNS service was generally unavailable or failing only for certain requests.
 
@@ -2587,7 +2593,7 @@ The underlying reason for the router's behavior remains unresolved.
 
 ---
 
-## Phase 10 Results
+#### Phase 10 Results
 
 | Validation | Observed result | Status |
 |---|---|---|
@@ -2602,7 +2608,7 @@ The underlying reason for the router's behavior remains unresolved.
 | DNS-SD query over UDP | Timed out | INVESTIGATED |
 | DNS-SD query over TCP | Timed out | INVESTIGATED |
 
-### Key Performance Metrics
+##### Key Performance Metrics
 
 | Metric | Recorded value |
 |---|---:|
@@ -2619,7 +2625,7 @@ The underlying reason for the router's behavior remains unresolved.
 
 ---
 
-## Evidence Limitations
+#### Evidence Limitations
 
 The Phase 10 evidence represents measurements and observations collected during specific test periods.
 
@@ -2639,7 +2645,7 @@ The DNS-SD timeout issue remains an identified but unresolved operational limita
 
 ---
 
-## Phase 10 Conclusion
+#### Phase 10 Conclusion
 
 Phase 10 expanded my Raspberry Pi DNS Security Lab from installation and functional validation into operational monitoring and troubleshooting.
 
