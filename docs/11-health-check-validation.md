@@ -73,9 +73,11 @@ Summary: 0 failure(s), 0 warning(s)
 
 ## Evidence
 
-A terminal screenshot was captured showing the command and full output. The image is not yet committed to the repository. Once uploaded to `screenshots/phase11-dns-health-check-success.png`, uncomment the following Markdown line to display it:
+The terminal screenshot is committed to the repository and shows the command, successful service and DNS checks, system resources, and the zero-failure summary.
 
-<!-- ![Phase 11 successful DNS health-check run](../screenshots/phase11-dns-health-check-success.png) -->
+![Phase 11 successful DNS health-check run](../screenshots/phase11-dns-health-check-success.png)
+
+*Figure 1 — Raspberry Pi DNS infrastructure health check completed with five passing checks, zero failures, and zero warnings.*
 
 ## Interpretation and limitations
 
